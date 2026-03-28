@@ -1,2 +1,8 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MusicShop.API/MusicShop.API.csproj" />
+    <Project Path="src/MusicShop.Application/MusicShop.Application.csproj" />
+    <Project Path="src/MusicShop.Domain/MusicShop.Domain.csproj" />
+    <Project Path="src/MusicShop.Infrastructure/MusicShop.Infrastructure.csproj" />
+  </Folder>
 </Solution>

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "4ga3lPYACOY=",
+  "success": true,
+  "projectFilePath": "D:\\Pine tree\\MusicShop\\src\\MusicShop.API\\MusicShop.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\usopp\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.4\\microsoft.aspnetcore.openapi.10.0.4.nupkg.sha512",
+    "C:\\Users\\usopp\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
