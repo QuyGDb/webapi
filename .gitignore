@@ -1,0 +1,59 @@
+# .NET GitIgnore
+
+# Generic .NET Binaries
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio files
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Results and Log files
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# User-specific files (DotSettings)
+*.dotSettings.user
+
+# Mac files
+.DS_Store
+
+# Docker files
+.docker/
+docker-compose.override.yml
+
+# Environment secret files
+.env
+.env.*
+
+# NuGet Packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+# Uncomment if using NuGet Repository Config
+# .nuget/
+
+# Entity Framework (DO NOT IGNORE MIGRATIONS)
+# Persistence/Migrations/ is normally kept in Git
+
+# App Settings (keep for now, ignore if real secrets are added later)
+# appsettings.local.json
