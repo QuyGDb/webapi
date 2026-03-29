@@ -1,7 +1,7 @@
 namespace MusicShop.Domain.Common;
 
 /// <summary>
-/// Class cha cho tất cả Entity. Mọi bảng trong DB đều có Id, CreatedAt, UpdatedAt.
+/// Base class for all Entities. Every table in the DB has Id, CreatedAt, and UpdatedAt.
 /// </summary>
 public abstract class BaseEntity
 {

@@ -11,6 +11,6 @@ public class Label : BaseEntity
     public int? FoundedYear { get; set; }
     public string? Website { get; set; }
 
-    // Navigation: 1 Label phát hành nhiều Release
+    // Navigation: 1 Label publishes many Releases
     public ICollection<Release> Releases { get; set; } = new List<Release>();
 }

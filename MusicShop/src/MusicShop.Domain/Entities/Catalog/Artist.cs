@@ -12,6 +12,6 @@ public class Artist : BaseEntity
     public string? Country { get; set; }
     public string? ImageUrl { get; set; }
 
-    // Navigation: 1 Artist có nhiều MasterRelease
+    // Navigation: 1 Artist has many MasterReleases
     public ICollection<MasterRelease> MasterReleases { get; set; } = new List<MasterRelease>();
 }

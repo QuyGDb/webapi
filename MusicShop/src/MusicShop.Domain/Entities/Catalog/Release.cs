@@ -6,8 +6,8 @@ using MusicShop.Domain.Enums;
 namespace MusicShop.Domain.Entities.Catalog;
 
 /// <summary>
-/// Bản ép cụ thể - ví dụ: "Dark Side of the Moon - US 1973 first press"
-/// hay "Japan OBI 1976", "2011 remaster 180g"...
+/// Specific pressing - e.g.: "Dark Side of the Moon - US 1973 first press"
+/// or "Japan OBI 1976", "2011 remaster 180g"...
 /// </summary>
 public class Release : BaseEntity
 {

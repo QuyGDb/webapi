@@ -1,6 +1,6 @@
 namespace MusicShop.Domain.Enums;
 
 /// <summary>
-/// Tình trạng đĩa - giống chuẩn Discogs grading
+/// Item condition - following Discogs grading standards
 /// </summary>
 public enum Condition { Mint, NearMint, VGPlus, VG, Good, Poor }

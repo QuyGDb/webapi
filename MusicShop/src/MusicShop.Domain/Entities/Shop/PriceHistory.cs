@@ -1,4 +1,6 @@
 using MusicShop.Domain.Common;
+using MusicShop.Domain.Enums;
+
 
 namespace MusicShop.Domain.Entities.Shop;
 

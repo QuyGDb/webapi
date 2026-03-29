@@ -6,7 +6,7 @@ public class Track : BaseEntity
 {
     public int Position { get; set; }
     public string Title { get; set; } = string.Empty;
-    public int? Duration { get; set; } // giây
+    public int? Duration { get; set; } // seconds
 
     // FK
     public Guid ReleaseId { get; set; }

@@ -22,7 +22,7 @@ public class Product : BaseEntity
     public bool IsPreOrder { get; set; }
     public DateTime? ReleaseDate { get; set; }
 
-    // FK (nullable - merch như áo, sách không có Release)
+    // FK (nullable - merch like shirts, books don't have a Release)
     public Guid? ReleaseId { get; set; }
     public Release? Release { get; set; }
 
