@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -17,8 +18,10 @@ public class JwtTokenService : ITokenService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateToken(User user)
+    public (string Token, DateTime ExpiresAtUtc) GenerateAccessToken(User user)
     {
+        DateTime expiresAtUtc = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
+
         List<Claim> claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -35,10 +38,19 @@ public class JwtTokenService : ITokenService
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: expiresAtUtc,
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return (new JwtSecurityTokenHandler().WriteToken(token), expiresAtUtc);
+    }
+
+    public (string Token, DateTime ExpiresAtUtc) GenerateRefreshToken()
+    {
+        byte[] bytes = new byte[64];
+        RandomNumberGenerator.Fill(bytes);
+        string token = Convert.ToBase64String(bytes);
+        DateTime expiresAtUtc = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenDays);
+        return (token, expiresAtUtc);
     }
 }

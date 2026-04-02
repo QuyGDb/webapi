@@ -8,19 +8,25 @@ namespace MusicShop.Application.UseCases.Auth.Commands.Register;
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
 {
     private readonly IRepository<User> _userRepository;
+    private readonly IRepository<RefreshToken> _refreshTokenRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IRefreshTokenHasher _refreshTokenHasher;
     private readonly ITokenService _tokenService;
     private readonly IUnitOfWork _unitOfWork;
 
     // Inject required dependencies
     public RegisterCommandHandler(
-        IRepository<User> userRepository, 
-        IPasswordHasher passwordHasher, 
-        ITokenService tokenService, 
+        IRepository<User> userRepository,
+        IRepository<RefreshToken> refreshTokenRepository,
+        IPasswordHasher passwordHasher,
+        IRefreshTokenHasher refreshTokenHasher,
+        ITokenService tokenService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
         _passwordHasher = passwordHasher;
+        _refreshTokenHasher = refreshTokenHasher;
         _tokenService = tokenService;
         _unitOfWork = unitOfWork;
     }
@@ -30,7 +36,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
     {
         // Check if the email is already registered
         User? existingUser = await _userRepository.FirstOrDefaultAsync(u => u.Email == request.Email);
-        
+
         if (existingUser != null)
         {
             throw new Exception("Error: This email is already registered!");
@@ -45,20 +51,32 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             Email = request.Email,
             FullName = request.FullName,
             PasswordHash = hashedPassword,
-            Role = MusicShop.Domain.Enums.UserRole.Customer
+            Role = Domain.Enums.UserRole.Customer
         };
 
-        // Save to Database
+        // Save user to change tracker
         _userRepository.Add(newUser);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Generate a JWT Token
-        string token = _tokenService.GenerateToken(newUser);
+        // Generate access token and refresh token for this user
+        (string accessToken, DateTime accessTokenExpiresAtUtc) = _tokenService.GenerateAccessToken(newUser);
+        (string refreshToken, DateTime refreshTokenExpiresAtUtc) = _tokenService.GenerateRefreshToken();
+
+        // Persist only the hash so leaked DB data cannot be used as a raw token
+        _refreshTokenRepository.Add(new RefreshToken
+        {
+            UserId = newUser.Id,
+            TokenHash = _refreshTokenHasher.Hash(refreshToken),
+            ExpiresAt = refreshTokenExpiresAtUtc
+        });
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Return the AuthResponse containing user info and token
         return new AuthResponse
         {
-            Token = token,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpiresAt = accessTokenExpiresAtUtc,
             UserId = newUser.Id,
             Email = newUser.Email,
             FullName = newUser.FullName,

@@ -1,6 +1,9 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using MusicShop.Application.DTOs.Auth;
+using MusicShop.Application.UseCases.Auth.Commands.Refresh;
 using MusicShop.Application.UseCases.Auth.Commands.Register;
 using MusicShop.Application.UseCases.Auth.Queries.Login;
 
@@ -32,5 +35,30 @@ public class AuthController : ControllerBase
         // Route the query to LoginQueryHandler
         AuthResponse result = await _mediator.Send(query);
         return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+    {
+        AuthResponse result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(ClaimTypes.Name)
+            ?? User.FindFirstValue("sub");
+        string? email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+        string? role = User.FindFirstValue(ClaimTypes.Role);
+
+        return Ok(new
+        {
+            UserId = userId,
+            Email = email,
+            Role = role
+        });
     }
 }

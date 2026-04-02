@@ -25,6 +25,7 @@ public static class DependencyInjection
 
         // 3. Register Security Services
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IRefreshTokenHasher, RefreshTokenHasher>();
 
         // 4. Register JWT Services
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));

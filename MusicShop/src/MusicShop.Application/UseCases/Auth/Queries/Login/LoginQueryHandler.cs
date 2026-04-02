@@ -8,18 +8,27 @@ namespace MusicShop.Application.UseCases.Auth.Queries.Login;
 public class LoginQueryHandler : IRequestHandler<LoginQuery, AuthResponse>
 {
     private readonly IRepository<User> _userRepository;
+    private readonly IRepository<RefreshToken> _refreshTokenRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IRefreshTokenHasher _refreshTokenHasher;
     private readonly ITokenService _tokenService;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Inject required dependencies
     public LoginQueryHandler(
         IRepository<User> userRepository,
+        IRepository<RefreshToken> refreshTokenRepository,
         IPasswordHasher passwordHasher,
-        ITokenService tokenService)
+        IRefreshTokenHasher refreshTokenHasher,
+        ITokenService tokenService,
+        IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
         _passwordHasher = passwordHasher;
+        _refreshTokenHasher = refreshTokenHasher;
         _tokenService = tokenService;
+        _unitOfWork = unitOfWork;
     }
 
     // Handle the login logic
@@ -27,7 +36,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, AuthResponse>
     {
         // Check if the user exists
         User? existingUser = await _userRepository.FirstOrDefaultAsync(u => u.Email == request.Email);
-        
+
         if (existingUser == null)
         {
             throw new Exception("Error: Invalid email or password!");
@@ -35,19 +44,31 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, AuthResponse>
 
         // Verify the provided password
         bool isPasswordValid = _passwordHasher.Verify(request.Password, existingUser.PasswordHash);
-        
+
         if (!isPasswordValid)
         {
             throw new Exception("Error: Invalid email or password!");
         }
 
-        // Generate JWT token
-        string token = _tokenService.GenerateToken(existingUser);
+        // Generate access token and refresh token for this user
+        (string accessToken, DateTime accessTokenExpiresAtUtc) = _tokenService.GenerateAccessToken(existingUser);
+        (string refreshToken, DateTime refreshTokenExpiresAtUtc) = _tokenService.GenerateRefreshToken();
+
+        _refreshTokenRepository.Add(new RefreshToken
+        {
+            UserId = existingUser.Id,
+            TokenHash = _refreshTokenHasher.Hash(refreshToken),
+            ExpiresAt = refreshTokenExpiresAtUtc
+        });
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Return authentication response
         return new AuthResponse
         {
-            Token = token,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpiresAt = accessTokenExpiresAtUtc,
             UserId = existingUser.Id,
             Email = existingUser.Email,
             FullName = existingUser.FullName,
