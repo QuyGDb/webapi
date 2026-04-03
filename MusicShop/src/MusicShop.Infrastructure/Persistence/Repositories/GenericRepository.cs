@@ -25,6 +25,28 @@ public class GenericRepository<T> : IRepository<T> where T : class
         return await _dbSet.ToListAsync();
     }
 
+    public async Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber, 
+        int pageSize, 
+        Expression<Func<T, bool>>? predicate = null)
+    {
+        IQueryable<T> query = _dbSet;
+
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        int totalCount = await query.CountAsync();
+
+        List<T> items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
     {
         return await _dbSet.FirstOrDefaultAsync(predicate);
