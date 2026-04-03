@@ -26,13 +26,13 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.Match(
+        return result.Match<IActionResult>(
             value => CreatedAtAction(nameof(Me), value),
             error => BadRequest(new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "Auth Error",
-                Detail = error.Description,
+                Detail = error.Message,
                 Extensions = { ["errorCode"] = error.Code }
             }));
     }
@@ -41,13 +41,13 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.Match(
+        return result.Match<IActionResult>(
             Ok,
             error => BadRequest(new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "Auth Error",
-                Detail = error.Description,
+                Detail = error.Message,
                 Extensions = { ["errorCode"] = error.Code }
             }));
     }
@@ -56,13 +56,13 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.Match(
+        return result.Match<IActionResult>(
             Ok,
             error => BadRequest(new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "Auth Error",
-                Detail = error.Description,
+                Detail = error.Message,
                 Extensions = { ["errorCode"] = error.Code }
             }));
     }
