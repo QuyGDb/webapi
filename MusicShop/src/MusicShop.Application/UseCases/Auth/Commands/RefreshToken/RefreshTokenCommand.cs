@@ -4,7 +4,4 @@ using MusicShop.Domain.Common;
 
 namespace MusicShop.Application.UseCases.Auth.Commands.TokenRefresh;
 
-public class RefreshTokenCommand : IRequest<Result<AuthResponse>>
-{
-    public string RefreshToken { get; set; } = string.Empty;
-}
+public sealed record RefreshTokenCommand(string RefreshToken) : IRequest<Result<AuthResponse>>;

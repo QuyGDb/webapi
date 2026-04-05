@@ -11,12 +11,12 @@ public sealed class GetArtistsQueryHandler(IRepository<Artist> artistRepository)
     : IRequestHandler<GetArtistsQuery, Result<PaginatedResult<ArtistResponse>>>
 {
     public async Task<Result<PaginatedResult<ArtistResponse>>> Handle(
-        GetArtistsQuery request, 
+        GetArtistsQuery request,
         CancellationToken cancellationToken)
     {
         // 1. Gọi hàm GetPagedAsync đã nâng cấp ở tầng Infrastructure
         var (items, totalCount) = await artistRepository.GetPagedAsync(
-            request.PageNumber, 
+            request.PageNumber,
             request.PageSize);
 
         // 2. Chuyển đổi từ Entity sang DTO
@@ -32,9 +32,9 @@ public sealed class GetArtistsQueryHandler(IRepository<Artist> artistRepository)
 
         // 3. Đóng gói vào PaginatedResult
         var result = new PaginatedResult<ArtistResponse>(
-            artistResponses, 
-            totalCount, 
-            request.PageNumber, 
+            artistResponses,
+            totalCount,
+            request.PageNumber,
             request.PageSize);
 
         return Result<PaginatedResult<ArtistResponse>>.Success(result);

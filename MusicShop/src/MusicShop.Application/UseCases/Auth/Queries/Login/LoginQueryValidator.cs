@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace MusicShop.Application.UseCases.Auth.Queries.Login;
 
-public class LoginQueryValidator : AbstractValidator<LoginQuery>
+public sealed class LoginQueryValidator : AbstractValidator<LoginQuery>
 {
     public LoginQueryValidator()
     {

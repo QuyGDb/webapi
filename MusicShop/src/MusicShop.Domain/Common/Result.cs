@@ -20,8 +20,8 @@ public class Result<TValue>
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
     public Error Error { get; }
-    public TValue Value => IsSuccess 
-        ? _value! 
+    public TValue Value => IsSuccess
+        ? _value!
         : throw new InvalidOperationException("Cannot access Value when Result failed.");
 
     public static Result<TValue> Success(TValue value) => new(value, true, Error.None);

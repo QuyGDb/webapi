@@ -69,7 +69,12 @@ public class ArtistsController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
-            return BadRequest("ID mismatch");
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "ID Mismatch",
+                Detail = "Route id does not match the body id."
+            });
         }
 
         var result = await mediator.Send(command);

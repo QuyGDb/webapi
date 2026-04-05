@@ -1,11 +1,11 @@
 using System.Linq.Expressions;
+using MusicShop.Domain.Common;
 
 namespace MusicShop.Domain.Interfaces;
 
-public interface IRepository<T> where T : class
+public interface IRepository<T> where T : BaseEntity
 {
     Task<T?> GetByIdAsync(Guid id);
-    Task<IReadOnlyList<T>> GetAllAsync();
     Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, 
         int pageSize, 

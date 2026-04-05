@@ -4,8 +4,6 @@ using MusicShop.Domain.Common;
 
 namespace MusicShop.Application.UseCases.Auth.Queries.Login;
 
-public class LoginQuery : IRequest<Result<AuthResponse>>
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-}
+public sealed record LoginQuery(
+    string Email,
+    string Password) : IRequest<Result<AuthResponse>>;

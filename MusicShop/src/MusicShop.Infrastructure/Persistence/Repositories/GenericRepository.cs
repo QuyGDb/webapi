@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Domain.Common;
 using MusicShop.Domain.Interfaces;
 using System.Linq.Expressions;
 
 namespace MusicShop.Infrastructure.Persistence.Repositories;
 
-public class GenericRepository<T> : IRepository<T> where T : class
+public class GenericRepository<T> : IRepository<T> where T : BaseEntity
 {
     protected readonly AppDbContext _context;
     protected readonly DbSet<T> _dbSet;
@@ -20,10 +21,6 @@ public class GenericRepository<T> : IRepository<T> where T : class
         return await _dbSet.FindAsync(id);
     }
 
-    public async Task<IReadOnlyList<T>> GetAllAsync()
-    {
-        return await _dbSet.ToListAsync();
-    }
 
     public async Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, 

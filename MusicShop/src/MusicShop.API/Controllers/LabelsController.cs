@@ -16,12 +16,12 @@ public class LabelsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetLabels(
-        [FromQuery] int pageNumber = 1, 
+        [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20)
     {
         var query = new GetLabelsQuery(pageNumber, pageSize);
         var result = await mediator.Send(query);
-        
+
         return result.Match<IActionResult>(
             Ok,
             error => BadRequest(new ProblemDetails
@@ -69,7 +69,12 @@ public class LabelsController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
-            return BadRequest("ID mismatch");
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "ID Mismatch",
+                Detail = "Route id does not match the body id."
+            });
         }
 
         var result = await mediator.Send(command);

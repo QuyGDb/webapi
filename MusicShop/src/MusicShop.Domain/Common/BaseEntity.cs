@@ -1,11 +1,10 @@
 namespace MusicShop.Domain.Common;
 
-/// <summary>
-/// Base class for all Entities. Every table in the DB has Id, CreatedAt, and UpdatedAt.
-/// </summary>
 public abstract class BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+
+    public void Touch() => UpdatedAt = DateTime.UtcNow;
 }

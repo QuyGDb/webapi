@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace MusicShop.Application.UseCases.Auth.Commands.Register;
 
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
     public RegisterCommandValidator()
     {

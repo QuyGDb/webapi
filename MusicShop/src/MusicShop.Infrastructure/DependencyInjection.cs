@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using MusicShop.Domain.Interfaces;
 using MusicShop.Infrastructure.Persistence;
 using MusicShop.Infrastructure.Persistence.Repositories;
@@ -28,8 +27,11 @@ public static class DependencyInjection
         services.AddSingleton<IRefreshTokenHasher, RefreshTokenHasher>();
 
         // 4. Register JWT Services
-        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
-        services.AddSingleton<ITokenService, JwtTokenService>();
+        // ValidateOnStart: crash immediately at startup if config is missing/invalid
+        services.AddOptions<JwtSettings>()
+            .Bind(configuration.GetSection(JwtSettings.SectionName))
+            .ValidateOnStart();
+        services.AddScoped<ITokenService, JwtTokenService>();
 
         return services;
     }

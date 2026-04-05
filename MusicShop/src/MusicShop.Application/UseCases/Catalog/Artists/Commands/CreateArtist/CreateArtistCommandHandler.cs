@@ -13,17 +13,15 @@ public sealed class CreateArtistCommandHandler(
     : IRequestHandler<CreateArtistCommand, Result<ArtistResponse>>
 {
     public async Task<Result<ArtistResponse>> Handle(
-        CreateArtistCommand request, 
+        CreateArtistCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. Kiểm tra xem nghệ sĩ đã tồn tại chưa (Dựa vào tên)
         var existingArtist = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name);
         if (existingArtist != null)
         {
             return Result<ArtistResponse>.Failure(ArtistErrors.DuplicateName);
         }
 
-        // 2. Tạo Entity mới từ Command
         var artist = new Artist
         {
             Name = request.Name,
@@ -33,13 +31,10 @@ public sealed class CreateArtistCommandHandler(
             ImageUrl = request.ImageUrl
         };
 
-        // 3. Thêm vào Repository
         artistRepository.Add(artist);
 
-        // 4. Lưu thay đổi vào Database
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 5. Trả về thông tin nghệ sĩ đã tạo
         return Result<ArtistResponse>.Success(new ArtistResponse
         {
             Id = artist.Id,

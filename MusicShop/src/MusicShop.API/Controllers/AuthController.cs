@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using MusicShop.Application.DTOs.Auth;
@@ -25,9 +23,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        var result = await _mediator.Send(command);
+        Result<AuthResponse> result = await _mediator.Send(command);
         return result.Match<IActionResult>(
-            value => CreatedAtAction(nameof(Me), value),
+            Ok,
             error => BadRequest(new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
@@ -40,7 +38,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginQuery query)
     {
-        var result = await _mediator.Send(query);
+        Result<AuthResponse> result = await _mediator.Send(query);
         return result.Match<IActionResult>(
             Ok,
             error => BadRequest(new ProblemDetails
@@ -55,7 +53,7 @@ public class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
     {
-        var result = await _mediator.Send(command);
+        Result<AuthResponse> result = await _mediator.Send(command);
         return result.Match<IActionResult>(
             Ok,
             error => BadRequest(new ProblemDetails
@@ -67,21 +65,4 @@ public class AuthController : ControllerBase
             }));
     }
 
-    [Authorize]
-    [HttpGet("me")]
-    public IActionResult Me()
-    {
-        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue(ClaimTypes.Name)
-            ?? User.FindFirstValue("sub");
-        string? email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
-        string? role = User.FindFirstValue(ClaimTypes.Role);
-
-        return Ok(new
-        {
-            UserId = userId,
-            Email = email,
-            Role = role
-        });
-    }
 }
