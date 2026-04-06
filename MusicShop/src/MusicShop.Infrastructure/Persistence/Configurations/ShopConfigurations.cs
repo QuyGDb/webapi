@@ -40,9 +40,6 @@ public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVaria
         builder.Property(x => x.Price)
             .HasPrecision(18, 2); // Currency data type
 
-        builder.Property(x => x.Condition)
-            .HasConversion<string>(); // Map Condition Enum to string
-
         builder.HasIndex(x => x.Sku).IsUnique(); // SKU must be unique
     }
 }
@@ -78,16 +75,4 @@ public class ProductCollectionItemConfiguration : IEntityTypeConfiguration<Produ
     }
 }
 
-public class PriceHistoryConfiguration : IEntityTypeConfiguration<PriceHistory>
-{
-    public void Configure(EntityTypeBuilder<PriceHistory> builder)
-    {
-        builder.HasKey(x => x.Id);
-        
-        builder.Property(x => x.Price)
-            .HasPrecision(18, 2);
 
-        builder.Property(x => x.Condition)
-            .HasConversion<string>();
-    }
-}

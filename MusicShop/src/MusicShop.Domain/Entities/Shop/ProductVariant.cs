@@ -12,7 +12,6 @@ public class ProductVariant : BaseEntity
     public bool IsAvailable { get; set; } = true;
 
     // Metadata for physical media
-    public Condition? Condition { get; set; }
     public string? Colorway { get; set; }
 
     // FK

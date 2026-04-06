@@ -19,7 +19,6 @@ public class CollectionConfiguration : IEntityTypeConfiguration<Collection>
     {
         builder.HasKey(x => x.Id);
         
-        builder.Property(x => x.Condition).HasConversion<string>();
         builder.Property(x => x.PurchasePrice).HasPrecision(18, 2);
     }
 }

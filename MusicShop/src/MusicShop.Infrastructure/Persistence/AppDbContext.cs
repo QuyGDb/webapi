@@ -24,7 +24,6 @@ public class AppDbContext : DbContext
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<ProductCollection> ProductCollections => Set<ProductCollection>();
     public DbSet<ProductCollectionItem> ProductCollectionItems => Set<ProductCollectionItem>();
-    public DbSet<PriceHistory> PriceHistories => Set<PriceHistory>();
 
     // Orders
     public DbSet<Cart> Carts => Set<Cart>();

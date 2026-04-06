@@ -7,7 +7,6 @@ public class Collection : BaseEntity
 {
     public Guid CustomerId { get; set; }
     public Guid ProductId { get; set; }
-    public Condition Condition { get; set; }
     public decimal PurchasePrice { get; set; }
     public string? Notes { get; set; }
     public DateTime AcquiredAt { get; set; } = DateTime.UtcNow;

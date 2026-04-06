@@ -56,6 +56,18 @@ public class MasterReleaseConfiguration : IEntityTypeConfiguration<MasterRelease
             .IsRequired()
             .HasMaxLength(300);
 
+        builder.Property(x => x.Year)
+            .IsRequired();
+
+        builder.Property(x => x.Genre)
+            .HasMaxLength(150);
+
+        builder.Property(x => x.CoverUrl)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.Description)
+            .HasMaxLength(2000);
+
         builder.HasIndex(x => x.Title); // Index for faster searching of master releases
 
         // 1 Master -> Many Releases
