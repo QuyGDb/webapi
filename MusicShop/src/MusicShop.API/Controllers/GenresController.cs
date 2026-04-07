@@ -11,7 +11,7 @@ public class GenresController(IMediator mediator) : BaseApiController
     [HttpGet]
     public async Task<IActionResult> GetGenres()
     {
-        MusicShop.Domain.Common.Result<IReadOnlyList<MusicShop.Application.DTOs.Catalog.GenreResponse>> result = await mediator.Send(new GetGenresQuery());
+        Domain.Common.Result<IReadOnlyList<Application.DTOs.Catalog.GenreResponse>> result = await mediator.Send(new GetGenresQuery());
         return HandleResult(result);
     }
 
@@ -19,7 +19,7 @@ public class GenresController(IMediator mediator) : BaseApiController
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateGenre([FromBody] CreateGenreCommand command)
     {
-        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.GenreResponse> result = await mediator.Send(command);
+        Domain.Common.Result<Application.DTOs.Catalog.GenreResponse> result = await mediator.Send(command);
         return HandleResult(result);
     }
 }

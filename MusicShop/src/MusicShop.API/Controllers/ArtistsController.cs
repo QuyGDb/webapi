@@ -17,7 +17,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
         [FromQuery] int pageSize = 20)
     {
         GetArtistsQuery query = new GetArtistsQuery(pageNumber, pageSize);
-        Domain.Common.Result<Application.Common.PaginatedResult<MusicShop.Application.DTOs.Catalog.ArtistResponse>> result = await mediator.Send(query);
+        Domain.Common.Result<Application.Common.PaginatedResult<Application.DTOs.Catalog.ArtistResponse>> result = await mediator.Send(query);
 
         return HandlePaginatedResult(result);
     }

@@ -11,7 +11,7 @@ public class ReleaseVersionsController(IMediator mediator) : BaseApiController
     [HttpGet("by-release/{releaseId:guid}")]
     public async Task<IActionResult> GetByRelease(Guid releaseId)
     {
-        MusicShop.Domain.Common.Result<IReadOnlyList<MusicShop.Application.DTOs.Catalog.ReleaseVersionDto>> result = await mediator.Send(new GetReleaseVersionsByReleaseQuery(releaseId));
+        Domain.Common.Result<IReadOnlyList<Application.DTOs.Catalog.ReleaseVersionDto>> result = await mediator.Send(new GetReleaseVersionsByReleaseQuery(releaseId));
         return HandleResult(result);
     }
 

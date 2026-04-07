@@ -9,7 +9,7 @@ public interface IArtistRepository : IRepository<Artist>
 
     // Get a paged list of Artists with their Genres
     Task<(IReadOnlyList<Artist> Items, int TotalCount)> GetPagedWithGenresAsync(
-        int pageNumber, 
-        int pageSize, 
+        int pageNumber,
+        int pageSize,
         CancellationToken ct = default);
 }

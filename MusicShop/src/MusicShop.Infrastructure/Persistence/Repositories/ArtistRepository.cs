@@ -19,8 +19,8 @@ public sealed class ArtistRepository : GenericRepository<Artist>, IArtistReposit
     }
 
     public async Task<(IReadOnlyList<Artist> Items, int TotalCount)> GetPagedWithGenresAsync(
-        int pageNumber, 
-        int pageSize, 
+        int pageNumber,
+        int pageSize,
         CancellationToken ct = default)
     {
         IQueryable<Artist> query = _context.Set<Artist>()

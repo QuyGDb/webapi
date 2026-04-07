@@ -19,7 +19,7 @@ public class LabelsController(IMediator mediator) : BaseApiController
         [FromQuery] string? country = null)
     {
         GetLabelsQuery query = new GetLabelsQuery(pageNumber, pageSize, q, country);
-        MusicShop.Domain.Common.Result<MusicShop.Application.Common.PaginatedResult<MusicShop.Application.DTOs.Catalog.LabelResponse>> result = await mediator.Send(query);
+        Domain.Common.Result<Application.Common.PaginatedResult<Application.DTOs.Catalog.LabelResponse>> result = await mediator.Send(query);
 
         return HandlePaginatedResult(result);
     }
