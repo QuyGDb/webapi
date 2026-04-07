@@ -26,7 +26,7 @@ public sealed class ReleaseRepository : GenericRepository<Release>, IReleaseRepo
         string? q = null,
         CancellationToken ct = default)
     {
-        var query = _context.Set<Release>()
+        IQueryable<Release> query = _context.Set<Release>()
             .Include(x => x.Artist)
             .Include(x => x.ReleaseGenres)
                 .ThenInclude(x => x.Genre)
@@ -45,7 +45,7 @@ public sealed class ReleaseRepository : GenericRepository<Release>, IReleaseRepo
             query = query.Where(x => x.Title.Contains(q));
 
         int total = await query.CountAsync(ct);
-        var items = await query
+        List<Release> items = await query
             .OrderByDescending(x => x.Year)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)

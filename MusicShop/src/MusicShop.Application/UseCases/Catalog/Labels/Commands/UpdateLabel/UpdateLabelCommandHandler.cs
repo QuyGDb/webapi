@@ -16,13 +16,13 @@ public sealed class UpdateLabelCommandHandler(
         UpdateLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        var label = await labelRepository.GetByIdAsync(request.Id);
+        Label? label = await labelRepository.GetByIdAsync(request.Id);
         if (label == null)
         {
             return Result<LabelResponse>.Failure(LabelErrors.NotFound);
         }
 
-        var existingWithSameName = await labelRepository.FirstOrDefaultAsync(
+        Label? existingWithSameName = await labelRepository.FirstOrDefaultAsync(
             x => x.Name == request.Name && x.Id != request.Id);
         
         if (existingWithSameName != null)

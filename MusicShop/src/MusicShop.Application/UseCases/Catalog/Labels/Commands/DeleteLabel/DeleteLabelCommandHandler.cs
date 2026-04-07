@@ -15,7 +15,7 @@ public sealed class DeleteLabelCommandHandler(
         DeleteLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        var label = await labelRepository.GetByIdAsync(request.Id);
+        Label? label = await labelRepository.GetByIdAsync(request.Id);
         if (label == null)
         {
             return Result<bool>.Failure(LabelErrors.NotFound);

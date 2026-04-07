@@ -16,15 +16,15 @@ public sealed class UpdateArtistCommandHandler(
         UpdateArtistCommand request, 
         CancellationToken cancellationToken)
     {
-        // 1. Kiểm tra tồn tại
-        var artist = await artistRepository.GetByIdAsync(request.Id);
+        // 1. Check if artist exists
+        Artist? artist = await artistRepository.GetByIdAsync(request.Id);
         if (artist == null)
         {
             return Result<ArtistResponse>.Failure(ArtistErrors.NotFound);
         }
 
-        // 2. Kiểm tra trùng tên với người khác
-        var existingWithSameName = await artistRepository.FirstOrDefaultAsync(
+        // 2. Check for duplicate name with others
+        Artist? existingWithSameName = await artistRepository.FirstOrDefaultAsync(
             x => x.Name == request.Name && x.Id != request.Id);
         
         if (existingWithSameName != null)
@@ -32,7 +32,7 @@ public sealed class UpdateArtistCommandHandler(
             return Result<ArtistResponse>.Failure(ArtistErrors.DuplicateName);
         }
 
-        // 3. Cập nhật thông tin
+        // 3. Update information
         artist.Name = request.Name;
         artist.Bio = request.Bio;
         // artist.Genre = request.Genre; // Genre is now Many-to-Many

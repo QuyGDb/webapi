@@ -13,7 +13,7 @@ public sealed class GetReleasesQueryHandler(IReleaseRepository releaseRepository
         GetReleasesQuery request, 
         CancellationToken cancellationToken)
     {
-        var (items, total) = await releaseRepository.GetPagedWithFiltersAsync(
+        (IReadOnlyList<MusicShop.Domain.Entities.Catalog.Release> items, int total) = await releaseRepository.GetPagedWithFiltersAsync(
             request.PageNumber,
             request.PageSize,
             request.ArtistId,
@@ -22,7 +22,7 @@ public sealed class GetReleasesQueryHandler(IReleaseRepository releaseRepository
             request.Q,
             cancellationToken);
 
-        var responseItems = items.Select(r => new ReleaseResponse
+        List<ReleaseResponse> responseItems = items.Select(r => new ReleaseResponse
         {
             Id = r.Id,
             Title = r.Title,
@@ -39,7 +39,7 @@ public sealed class GetReleasesQueryHandler(IReleaseRepository releaseRepository
             }).ToList()
         }).ToList();
 
-        var result = new PaginatedResult<ReleaseResponse>(
+        PaginatedResult<ReleaseResponse> result = new PaginatedResult<ReleaseResponse>(
             responseItems, 
             total, 
             request.PageNumber, 

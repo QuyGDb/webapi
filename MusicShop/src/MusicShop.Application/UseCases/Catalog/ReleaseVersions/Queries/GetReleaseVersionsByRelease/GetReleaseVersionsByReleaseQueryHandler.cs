@@ -12,9 +12,9 @@ public sealed class GetReleaseVersionsByReleaseQueryHandler(IReleaseVersionRepos
         GetReleaseVersionsByReleaseQuery request, 
         CancellationToken cancellationToken)
     {
-        var versions = await releaseVersionRepository.GetByReleaseIdAsync(request.ReleaseId, cancellationToken);
+        IReadOnlyList<MusicShop.Domain.Entities.Catalog.ReleaseVersion> versions = await releaseVersionRepository.GetByReleaseIdAsync(request.ReleaseId, cancellationToken);
 
-        var response = versions.Select(v => new ReleaseVersionDto
+        List<ReleaseVersionDto> response = versions.Select(v => new ReleaseVersionDto
         {
             Id = v.Id,
             PressingCountry = v.PressingCountry,

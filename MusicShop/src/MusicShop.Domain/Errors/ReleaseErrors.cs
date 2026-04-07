@@ -6,9 +6,9 @@ public static class ReleaseErrors
 {
     public static readonly Error NotFound = new(
         "Release.NotFound", 
-        "Bản phát hành gốc (Release) không tồn tại.");
+        "The specified release was not found.");
 
     public static readonly Error ArtistNotFound = new(
         "Artist.NotFound", 
-        "Nghệ sĩ liên quan không tồn tại trong hệ thống.");
+        "The associated artist was not found.");
 }

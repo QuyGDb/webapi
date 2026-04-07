@@ -11,7 +11,7 @@ public class ReleaseVersionsController(IMediator mediator) : BaseApiController
     [HttpGet("by-release/{releaseId:guid}")]
     public async Task<IActionResult> GetByRelease(Guid releaseId)
     {
-        var result = await mediator.Send(new GetReleaseVersionsByReleaseQuery(releaseId));
+        MusicShop.Domain.Common.Result<IReadOnlyList<MusicShop.Application.DTOs.Catalog.ReleaseVersionDto>> result = await mediator.Send(new GetReleaseVersionsByReleaseQuery(releaseId));
         return HandleResult(result);
     }
 
@@ -19,7 +19,7 @@ public class ReleaseVersionsController(IMediator mediator) : BaseApiController
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateReleaseVersion([FromBody] CreateReleaseVersionCommand command)
     {
-        var result = await mediator.Send(command);
+        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.ReleaseVersionDto> result = await mediator.Send(command);
         return HandleResult(result);
     }
 }

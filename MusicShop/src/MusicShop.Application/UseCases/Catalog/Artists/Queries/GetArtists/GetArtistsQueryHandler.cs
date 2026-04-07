@@ -14,13 +14,13 @@ public sealed class GetArtistsQueryHandler(IRepository<Artist> artistRepository)
         GetArtistsQuery request,
         CancellationToken cancellationToken)
     {
-        // 1. Gọi hàm GetPagedAsync đã nâng cấp ở tầng Infrastructure
-        var (items, totalCount) = await artistRepository.GetPagedAsync(
+        // 1. Call GetPagedAsync from Infrastructure layer
+        (IReadOnlyList<Artist> items, int totalCount) = await artistRepository.GetPagedAsync(
             request.PageNumber,
             request.PageSize);
 
-        // 2. Chuyển đổi từ Entity sang DTO
-        var artistResponses = items.Select(artist => new ArtistResponse
+        // 2. Map Entity to DTO
+        List<ArtistResponse> artistResponses = items.Select(artist => new ArtistResponse
         {
             Id = artist.Id,
             Name = artist.Name,
@@ -30,8 +30,8 @@ public sealed class GetArtistsQueryHandler(IRepository<Artist> artistRepository)
             ImageUrl = artist.ImageUrl
         }).ToList();
 
-        // 3. Đóng gói vào PaginatedResult
-        var result = new PaginatedResult<ArtistResponse>(
+        // 3. Wrap result into PaginatedResult
+        PaginatedResult<ArtistResponse> result = new PaginatedResult<ArtistResponse>(
             artistResponses,
             totalCount,
             request.PageNumber,

@@ -14,7 +14,7 @@ public sealed class GetArtistByIdQueryHandler(IRepository<Artist> artistReposito
         GetArtistByIdQuery request, 
         CancellationToken cancellationToken)
     {
-        var artist = await artistRepository.GetByIdAsync(request.Id);
+        Artist? artist = await artistRepository.GetByIdAsync(request.Id);
 
         if (artist == null)
         {

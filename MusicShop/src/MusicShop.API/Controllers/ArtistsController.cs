@@ -16,8 +16,8 @@ public class ArtistsController(IMediator mediator) : BaseApiController
         [FromQuery] int pageNumber = 1, 
         [FromQuery] int pageSize = 20)
     {
-        var query = new GetArtistsQuery(pageNumber, pageSize);
-        var result = await mediator.Send(query);
+        GetArtistsQuery query = new GetArtistsQuery(pageNumber, pageSize);
+        MusicShop.Domain.Common.Result<MusicShop.Application.Common.PaginatedResult<MusicShop.Application.DTOs.Catalog.ArtistResponse>> result = await mediator.Send(query);
         
         return HandlePaginatedResult(result);
     }
@@ -25,8 +25,8 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetArtist(Guid id)
     {
-        var query = new GetArtistByIdQuery(id);
-        var result = await mediator.Send(query);
+        GetArtistByIdQuery query = new GetArtistByIdQuery(id);
+        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.ArtistResponse> result = await mediator.Send(query);
 
         return HandleResult(result);
     }
@@ -34,7 +34,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     [HttpPost]
     public async Task<IActionResult> CreateArtist([FromBody] CreateArtistCommand command)
     {
-        var result = await mediator.Send(command);
+        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.ArtistResponse> result = await mediator.Send(command);
 
         // For Create, if successful, we return 201 Created and the wrapped object
         return result.Match(
@@ -51,7 +51,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
             return BadRequest(ApiResponse<object>.FailureResult("ID_MISMATCH", "Route id does not match the body id."));
         }
 
-        var result = await mediator.Send(command);
+        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.ArtistResponse> result = await mediator.Send(command);
 
         return HandleResult(result);
     }
@@ -59,8 +59,8 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteArtist(Guid id)
     {
-        var command = new DeleteArtistCommand(id);
-        var result = await mediator.Send(command);
+        DeleteArtistCommand command = new DeleteArtistCommand(id);
+        MusicShop.Domain.Common.Result<bool> result = await mediator.Send(command);
 
         return result.Match(
             _ => Ok(ApiResponse<object>.SuccessResult(null!)),

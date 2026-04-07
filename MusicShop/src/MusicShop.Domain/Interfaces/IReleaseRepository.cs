@@ -4,7 +4,7 @@ namespace MusicShop.Domain.Interfaces;
 
 public interface IReleaseRepository : IRepository<Release>
 {
-    // Lấy thông tin Album kèm theo thông tin Nghệ sĩ (Eager Loading)
+    // Get release with artist (Eager loading)
     Task<Release?> GetWithArtistAsync(Guid id, CancellationToken ct = default);
 
     Task<(IReadOnlyList<Release> Items, int TotalCount)> GetPagedWithFiltersAsync(

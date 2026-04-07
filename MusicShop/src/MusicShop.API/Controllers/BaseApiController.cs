@@ -22,7 +22,7 @@ public abstract class BaseApiController : ControllerBase
         return result.Match(
             value =>
             {
-                var meta = new MetaData
+                MetaData meta = new MetaData
                 {
                     Page = value.PageNumber,
                     Limit = value.PageSize,
@@ -37,14 +37,14 @@ public abstract class BaseApiController : ControllerBase
 
     private IActionResult MapError(Error error)
     {
-        var response = ApiResponse<object>.FailureResult(error.Code, error.Message);
+        ApiResponse<object> response = ApiResponse<object>.FailureResult(error.Code, error.Message);
 
         return error.Code switch
         {
-            var code when code.EndsWith(".NotFound") => NotFound(response),
-            var code when code.EndsWith(".Unauthorized") => Unauthorized(response),
-            var code when code.EndsWith(".Forbidden") => Forbid(), // Note: Forbid doesn't usually take a body with standard JWT
-            var code when code.EndsWith(".Conflict") => Conflict(response),
+            string code when code.EndsWith(".NotFound") => NotFound(response),
+            string code when code.EndsWith(".Unauthorized") => Unauthorized(response),
+            string code when code.EndsWith(".Forbidden") => Forbid(), // Note: Forbid doesn't usually take a body with standard JWT
+            string code when code.EndsWith(".Conflict") => Conflict(response),
             _ => BadRequest(response)
         };
     }

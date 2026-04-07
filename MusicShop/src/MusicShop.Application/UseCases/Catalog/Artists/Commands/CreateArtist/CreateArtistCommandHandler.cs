@@ -16,13 +16,13 @@ public sealed class CreateArtistCommandHandler(
         CreateArtistCommand request,
         CancellationToken cancellationToken)
     {
-        var existingArtist = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name);
+        Artist? existingArtist = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name);
         if (existingArtist != null)
         {
             return Result<ArtistResponse>.Failure(ArtistErrors.DuplicateName);
         }
 
-        var artist = new Artist
+        Artist artist = new Artist
         {
             Name = request.Name,
             Bio = request.Bio,

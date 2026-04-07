@@ -14,10 +14,10 @@ public class AppDbContext : DbContext
 
     // Table mapping according to ERD numbering
 
-    // 1. Vai trò người dùng (System)
+    // 1. User Roles (System)
     public DbSet<User> Users => Set<User>();
 
-    // 2. Catalog âm nhạc
+    // 2. Music Catalog
     public DbSet<Artist> Artists => Set<Artist>();
     public DbSet<Genre> Genres => Set<Genre>();
     public DbSet<Release> Releases => Set<Release>(); // Master
@@ -27,7 +27,7 @@ public class AppDbContext : DbContext
     public DbSet<ArtistGenre> ArtistGenres => Set<ArtistGenre>();
     public DbSet<ReleaseGenre> ReleaseGenres => Set<ReleaseGenre>();
 
-    // 3. Sản phẩm & Bán hàng (Shop)
+    // 3. Products & Sales (Shop)
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<VinylAttributes> VinylAttributes => Set<VinylAttributes>();
@@ -36,26 +36,26 @@ public class AppDbContext : DbContext
     public DbSet<CuratedCollection> CuratedCollections => Set<CuratedCollection>();
     public DbSet<CuratedCollectionItem> CuratedCollectionItems => Set<CuratedCollectionItem>();
 
-    // 4. Quy trình đơn hàng (Orders)
+    // 4. Order Process (Orders)
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Review> Reviews => Set<Review>();
 
-    // 5. Thanh toán
+    // 5. Payments
     public DbSet<Payment> Payments => Set<Payment>();
 
     // 6. Wantlist & Collection (Customer)
     public DbSet<WantlistItem> WantlistItems => Set<WantlistItem>();
     public DbSet<UserCollection> UserCollections => Set<UserCollection>();
 
-    // 7. Tính năng AI
+    // 7. AI Features
     public DbSet<AIConversation> AIConversations => Set<AIConversation>();
     public DbSet<AIMessage> AIMessages => Set<AIMessage>();
     public DbSet<Recommendation> Recommendations => Set<Recommendation>();
 
-    // 8. Thông báo (System)
+    // 8. Notifications (System)
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
 
     // Legacy/Extra

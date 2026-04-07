@@ -15,7 +15,7 @@ public sealed class DeleteArtistCommandHandler(
         DeleteArtistCommand request, 
         CancellationToken cancellationToken)
     {
-        var artist = await artistRepository.GetByIdAsync(request.Id);
+        Artist? artist = await artistRepository.GetByIdAsync(request.Id);
         if (artist == null)
         {
             return Result<bool>.Failure(ArtistErrors.NotFound);

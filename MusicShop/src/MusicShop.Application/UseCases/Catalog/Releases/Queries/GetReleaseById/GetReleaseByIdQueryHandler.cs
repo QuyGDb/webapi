@@ -13,11 +13,11 @@ public sealed class GetReleaseByIdQueryHandler(IReleaseRepository releaseReposit
         GetReleaseByIdQuery request, 
         CancellationToken cancellationToken)
     {
-        var release = await releaseRepository.GetWithDetailsAsync(request.Id, cancellationToken);
+        MusicShop.Domain.Entities.Catalog.Release? release = await releaseRepository.GetWithDetailsAsync(request.Id, cancellationToken);
         if (release == null)
             return Result<ReleaseDetailResponse>.Failure(ReleaseErrors.NotFound);
 
-        var response = new ReleaseDetailResponse
+        ReleaseDetailResponse response = new ReleaseDetailResponse
         {
             Id = release.Id,
             Title = release.Title,

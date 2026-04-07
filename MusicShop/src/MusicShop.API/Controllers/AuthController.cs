@@ -12,21 +12,21 @@ public class AuthController(IMediator mediator) : BaseApiController
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        var result = await mediator.Send(command);
+        MusicShop.Domain.Common.Result<AuthResponse> result = await mediator.Send(command);
         return HandleResult(result);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginQuery query)
     {
-        var result = await mediator.Send(query);
+        MusicShop.Domain.Common.Result<AuthResponse> result = await mediator.Send(query);
         return HandleResult(result);
     }
 
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
     {
-        var result = await mediator.Send(command);
+        MusicShop.Domain.Common.Result<AuthResponse> result = await mediator.Send(command);
         return HandleResult(result);
     }
 }

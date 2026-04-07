@@ -13,9 +13,9 @@ public sealed class GetGenresQueryHandler(IRepository<Genre> genreRepository)
         GetGenresQuery request, 
         CancellationToken cancellationToken)
     {
-        var genres = await genreRepository.GetPagedAsync(1, 1000); // Fetch all genres for now
+        (IReadOnlyList<Genre> Items, int TotalCount) genres = await genreRepository.GetPagedAsync(1, 1000); // Fetch all genres for now
 
-        var response = genres.Items.Select(g => new GenreResponse
+        List<GenreResponse> response = genres.Items.Select(g => new GenreResponse
         {
             Id = g.Id,
             Name = g.Name,

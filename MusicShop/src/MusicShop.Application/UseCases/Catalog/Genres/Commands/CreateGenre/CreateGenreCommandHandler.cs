@@ -16,13 +16,13 @@ public sealed class CreateGenreCommandHandler(
         CreateGenreCommand request, 
         CancellationToken cancellationToken)
     {
-        var existing = await genreRepository.FirstOrDefaultAsync(x => x.Slug == request.Slug);
+        Genre? existing = await genreRepository.FirstOrDefaultAsync(x => x.Slug == request.Slug);
         if (existing != null)
         {
             return Result<GenreResponse>.Failure(GenreErrors.DuplicateSlug);
         }
 
-        var genre = new Genre
+        Genre genre = new Genre
         {
             Name = request.Name,
             Slug = request.Slug

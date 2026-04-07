@@ -24,12 +24,12 @@ public sealed class GetLabelsQueryHandler(IRepository<Label> labelRepository)
                 (string.IsNullOrWhiteSpace(request.Country) || x.Country == request.Country);
         }
 
-        var (items, totalCount) = await labelRepository.GetPagedAsync(
+        (IReadOnlyList<Label> items, int totalCount) = await labelRepository.GetPagedAsync(
             request.PageNumber, 
             request.PageSize,
             predicate);
 
-        var labelResponses = items.Select(label => new LabelResponse
+        List<LabelResponse> labelResponses = items.Select(label => new LabelResponse
         {
             Id = label.Id,
             Name = label.Name,
@@ -38,7 +38,7 @@ public sealed class GetLabelsQueryHandler(IRepository<Label> labelRepository)
             Website = label.Website
         }).ToList();
 
-        var result = new PaginatedResult<LabelResponse>(
+        PaginatedResult<LabelResponse> result = new PaginatedResult<LabelResponse>(
             labelResponses, 
             totalCount, 
             request.PageNumber, 

@@ -14,7 +14,7 @@ public sealed class GetLabelByIdQueryHandler(IRepository<Label> labelRepository)
         GetLabelByIdQuery request, 
         CancellationToken cancellationToken)
     {
-        var label = await labelRepository.GetByIdAsync(request.Id);
+        Label? label = await labelRepository.GetByIdAsync(request.Id);
 
         if (label == null)
         {

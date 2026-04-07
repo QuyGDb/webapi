@@ -1,9 +1,12 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MusicShop.Application.Common;
+using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
 using MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleaseById;
 using MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleases;
+using MusicShop.Domain.Common;
 
 namespace MusicShop.API.Controllers;
 
@@ -18,15 +21,15 @@ public class ReleasesController(IMediator mediator) : BaseApiController
         [FromQuery] int? year = null,
         [FromQuery] string? q = null)
     {
-        var query = new GetReleasesQuery(pageNumber, pageSize, artistId, genre, year, q);
-        var result = await mediator.Send(query);
+        GetReleasesQuery query = new GetReleasesQuery(pageNumber, pageSize, artistId, genre, year, q);
+        Result<PaginatedResult<MusicShop.Application.DTOs.Catalog.ReleaseResponse>> result = await mediator.Send(query);
         return HandlePaginatedResult(result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetRelease(Guid id)
     {
-        var result = await mediator.Send(new GetReleaseByIdQuery(id));
+        Result<MusicShop.Application.DTOs.Catalog.ReleaseDetailResponse> result = await mediator.Send(new GetReleaseByIdQuery(id));
         return HandleResult(result);
     }
 
@@ -34,7 +37,7 @@ public class ReleasesController(IMediator mediator) : BaseApiController
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateRelease([FromBody] CreateReleaseCommand command)
     {
-        var result = await mediator.Send(command);
+        Result<MusicShop.Application.DTOs.Catalog.ReleaseResponse> result = await mediator.Send(command);
         return HandleResult(result);
     }
 }
