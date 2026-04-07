@@ -143,7 +143,7 @@ public class ReleaseGenreConfiguration : IEntityTypeConfiguration<ReleaseGenre>
         builder.HasKey(x => new { x.ReleaseId, x.GenreId });
 
         builder.HasOne(x => x.Release)
-            .WithMany()
+            .WithMany(x => x.ReleaseGenres)
             .HasForeignKey(x => x.ReleaseId);
 
         builder.HasOne(x => x.Genre)

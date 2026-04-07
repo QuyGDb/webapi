@@ -22,4 +22,6 @@ public class Release : BaseEntity
 
     // Navigation: Tracks belong to the original release
     public ICollection<Track> Tracks { get; set; } = new List<Track>();
+
+    public ICollection<ReleaseGenre> ReleaseGenres { get; set; } = new List<ReleaseGenre>();
 }

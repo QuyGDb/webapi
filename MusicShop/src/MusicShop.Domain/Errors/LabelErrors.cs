@@ -9,6 +9,6 @@ public static class LabelErrors
         "The label with the specified identifier was not found.");
 
     public static readonly Error DuplicateName = new(
-        "Label.DuplicateName", 
+        "Label.Conflict", 
         "A label with the same name already exists.");
 }

@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MusicShop.Application.Common;
-using MusicShop.Application.DTOs.Catalog;
+using MusicShop.API.Infrastructure;
 using MusicShop.Application.UseCases.Catalog.Labels.Commands.CreateLabel;
 using MusicShop.Application.UseCases.Catalog.Labels.Commands.DeleteLabel;
 using MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
@@ -10,9 +9,7 @@ using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabels;
 
 namespace MusicShop.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class LabelsController(IMediator mediator) : ControllerBase
+public class LabelsController(IMediator mediator) : BaseApiController
 {
     [HttpGet]
     public async Task<IActionResult> GetLabels(
@@ -22,15 +19,7 @@ public class LabelsController(IMediator mediator) : ControllerBase
         var query = new GetLabelsQuery(pageNumber, pageSize);
         var result = await mediator.Send(query);
 
-        return result.Match<IActionResult>(
-            Ok,
-            error => BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Catalog Error",
-                Detail = error.Message,
-                Extensions = { ["errorCode"] = error.Code }
-            }));
+        return HandlePaginatedResult(result);
     }
 
     [HttpGet("{id:guid}")]
@@ -39,14 +28,7 @@ public class LabelsController(IMediator mediator) : ControllerBase
         var query = new GetLabelByIdQuery(id);
         var result = await mediator.Send(query);
 
-        return result.Match<IActionResult>(
-            Ok,
-            error => NotFound(new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Title = "Label Not Found",
-                Detail = error.Message
-            }));
+        return HandleResult(result);
     }
 
     [HttpPost]
@@ -54,14 +36,10 @@ public class LabelsController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(command);
 
-        return result.Match<IActionResult>(
-            value => CreatedAtAction(nameof(GetLabel), new { id = value.Id }, value),
-            error => BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Validation Error",
-                Detail = error.Message
-            }));
+        return result.Match(
+            value => CreatedAtAction(nameof(GetLabel), new { id = value.Id }, ApiResponse<object>.SuccessResult(value)),
+            error => HandleResult(result)
+        );
     }
 
     [HttpPut("{id:guid}")]
@@ -69,24 +47,12 @@ public class LabelsController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
-            return BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "ID Mismatch",
-                Detail = "Route id does not match the body id."
-            });
+            return BadRequest(ApiResponse<object>.FailureResult("ID_MISMATCH", "Route id does not match the body id."));
         }
 
         var result = await mediator.Send(command);
 
-        return result.Match<IActionResult>(
-            Ok,
-            error => BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Update Error",
-                Detail = error.Message
-            }));
+        return HandleResult(result);
     }
 
     [HttpDelete("{id:guid}")]
@@ -95,13 +61,9 @@ public class LabelsController(IMediator mediator) : ControllerBase
         var command = new DeleteLabelCommand(id);
         var result = await mediator.Send(command);
 
-        return result.Match<IActionResult>(
-            _ => NoContent(),
-            error => BadRequest(new ProblemDetails
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Delete Error",
-                Detail = error.Message
-            }));
+        return result.Match(
+            _ => Ok(ApiResponse<object>.SuccessResult(null!)),
+            _ => HandleResult(result)
+        );
     }
 }

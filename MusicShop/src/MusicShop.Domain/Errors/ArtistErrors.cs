@@ -9,6 +9,6 @@ public static class ArtistErrors
         "The artist with the specified identifier was not found.");
 
     public static readonly Error DuplicateName = new(
-        "Artist.DuplicateName", 
+        "Artist.Conflict", 
         "An artist with the same name already exists.");
 }
