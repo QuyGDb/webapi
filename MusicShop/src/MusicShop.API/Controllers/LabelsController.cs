@@ -36,7 +36,7 @@ public class LabelsController(IMediator mediator) : BaseApiController
     [HttpPost]
     public async Task<IActionResult> CreateLabel([FromBody] CreateLabelCommand command)
     {
-        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.LabelResponse> result = await mediator.Send(command);
+        Domain.Common.Result<Application.DTOs.Catalog.LabelResponse> result = await mediator.Send(command);
 
         return result.Match(
             value => CreatedAtAction(nameof(GetLabel), new { id = value.Id }, ApiResponse<object>.SuccessResult(value)),

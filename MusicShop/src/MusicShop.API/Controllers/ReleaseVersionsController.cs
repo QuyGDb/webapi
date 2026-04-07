@@ -19,7 +19,7 @@ public class ReleaseVersionsController(IMediator mediator) : BaseApiController
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateReleaseVersion([FromBody] CreateReleaseVersionCommand command)
     {
-        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.ReleaseVersionDto> result = await mediator.Send(command);
+        Domain.Common.Result<Application.DTOs.Catalog.ReleaseVersionDto> result = await mediator.Send(command);
         return HandleResult(result);
     }
 }

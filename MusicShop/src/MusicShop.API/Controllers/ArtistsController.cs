@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicShop.API.Infrastructure;
@@ -31,6 +32,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
         return HandleResult(result);
     }
 
+    [Authorize(Roles = "admin")]
     [HttpPost]
     public async Task<IActionResult> CreateArtist([FromBody] CreateArtistCommand command)
     {
@@ -43,6 +45,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
         );
     }
 
+    [Authorize(Roles = "admin")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateArtist(Guid id, [FromBody] UpdateArtistCommand command)
     {
@@ -56,6 +59,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
         return HandleResult(result);
     }
 
+    [Authorize(Roles = "admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteArtist(Guid id)
     {
