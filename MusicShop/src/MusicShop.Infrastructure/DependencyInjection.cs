@@ -6,6 +6,8 @@ using MusicShop.Infrastructure.Persistence;
 using MusicShop.Infrastructure.Persistence.Repositories;
 using MusicShop.Infrastructure.Security;
 using MusicShop.Infrastructure.Services;
+using MusicShop.Infrastructure.Cache;
+using MusicShop.Application.Common.Interfaces;
 
 namespace MusicShop.Infrastructure;
 
@@ -35,6 +37,14 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(JwtSettings.SectionName))
             .ValidateOnStart();
         services.AddScoped<ITokenService, JwtTokenService>();
+        
+        // 5. Register Redis & Caching
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "MusicShop_";
+        });
+        services.AddSingleton<ICacheService, CacheService>();
 
         return services;
     }
