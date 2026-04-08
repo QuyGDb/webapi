@@ -7,37 +7,19 @@ using MusicShop.Domain.Interfaces;
 
 namespace MusicShop.Application.UseCases.Auth.Commands.Register;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthResponse>>
+public class RegisterCommandHandler(
+    IRepository<User> userRepository,
+    IRepository<RefreshToken> refreshTokenRepository,
+    IPasswordHasher passwordHasher,
+    IRefreshTokenHasher refreshTokenHasher,
+    ITokenService tokenService,
+    IUnitOfWork unitOfWork) : IRequestHandler<RegisterCommand, Result<AuthResponse>>
 {
-    private readonly IRepository<User> _userRepository;
-    private readonly IRepository<RefreshToken> _refreshTokenRepository;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly IRefreshTokenHasher _refreshTokenHasher;
-    private readonly ITokenService _tokenService;
-    private readonly IUnitOfWork _unitOfWork;
-
-    // Inject required dependencies
-    public RegisterCommandHandler(
-        IRepository<User> userRepository,
-        IRepository<RefreshToken> refreshTokenRepository,
-        IPasswordHasher passwordHasher,
-        IRefreshTokenHasher refreshTokenHasher,
-        ITokenService tokenService,
-        IUnitOfWork unitOfWork)
-    {
-        _userRepository = userRepository;
-        _refreshTokenRepository = refreshTokenRepository;
-        _passwordHasher = passwordHasher;
-        _refreshTokenHasher = refreshTokenHasher;
-        _tokenService = tokenService;
-        _unitOfWork = unitOfWork;
-    }
-
     // Handle the registration logic
     public async Task<Result<AuthResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         // Check if the email is already registered
-        User? existingUser = await _userRepository.FirstOrDefaultAsync(u => u.Email == request.Email);
+        User? existingUser = await userRepository.FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
         if (existingUser != null)
         {
@@ -45,7 +27,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         }
 
         // Hash the password for security
-        string hashedPassword = _passwordHasher.Hash(request.Password);
+        string hashedPassword = passwordHasher.Hash(request.Password);
 
         // Create new User entity
         User newUser = new User
@@ -57,21 +39,21 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Au
         };
 
         // Save user to change tracker
-        _userRepository.Add(newUser);
+        userRepository.Add(newUser);
 
         // Generate access token and refresh token for this user
-        (string accessToken, DateTime accessTokenExpiresAtUtc) = _tokenService.GenerateAccessToken(newUser);
-        (string refreshToken, DateTime refreshTokenExpiresAtUtc) = _tokenService.GenerateRefreshToken();
+        (string accessToken, DateTime accessTokenExpiresAtUtc) = tokenService.GenerateAccessToken(newUser);
+        (string refreshToken, DateTime refreshTokenExpiresAtUtc) = tokenService.GenerateRefreshToken();
 
         // Persist only the hash so leaked DB data cannot be used as a raw token
-        _refreshTokenRepository.Add(new RefreshToken
+        refreshTokenRepository.Add(new RefreshToken
         {
             UserId = newUser.Id,
-            TokenHash = _refreshTokenHasher.Hash(refreshToken),
+            TokenHash = refreshTokenHasher.Hash(refreshToken),
             ExpiresAt = refreshTokenExpiresAtUtc
         });
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Return the AuthResponse containing user info and token
         return Result<AuthResponse>.Success(new AuthResponse

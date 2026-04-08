@@ -29,23 +29,8 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement()
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-            },
-            new List<string>()
-        }
-    });
+    // Register selective Swagger lock filter
+    c.OperationFilter<MusicShop.API.Infrastructure.AuthorizeCheckOperationFilter>();
 });
 
 // 3. Register Clean Architecture Layers

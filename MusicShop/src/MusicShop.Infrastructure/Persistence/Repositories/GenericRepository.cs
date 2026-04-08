@@ -16,16 +16,17 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
         _dbSet = context.Set<T>();
     }
 
-    public async Task<T?> GetByIdAsync(Guid id)
+    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(id);
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
 
     public async Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, 
         int pageSize, 
-        Expression<Func<T, bool>>? predicate = null)
+        Expression<Func<T, bool>>? predicate = null,
+        CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = _dbSet;
 
@@ -34,19 +35,19 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
             query = query.Where(predicate);
         }
 
-        int totalCount = await query.CountAsync();
+        int totalCount = await query.CountAsync(cancellationToken);
 
         List<T> items = await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return (items, totalCount);
     }
 
-    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FirstOrDefaultAsync(predicate);
+        return await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     public void Add(T entity)

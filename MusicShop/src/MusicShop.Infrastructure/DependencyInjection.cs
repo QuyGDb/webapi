@@ -30,6 +30,8 @@ public static class DependencyInjection
         // 3. Register Security Services
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IRefreshTokenHasher, RefreshTokenHasher>();
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // 4. Register JWT Services
         // ValidateOnStart: crash immediately at startup if config is missing/invalid

@@ -19,4 +19,16 @@ public static class AuthErrors
     public static readonly Error UserNotFound = new(
         "User.NotFound", 
         "User not found.");
+
+    public static readonly Error Unauthorized = new(
+        "Auth.Unauthorized",
+        "User is not authenticated.");
+
+    public static readonly Error InvalidUserId = new(
+        "Auth.InvalidUserId",
+        "The user ID is invalid.");
+
+    public static readonly Error InvalidToken = new(
+        "Auth.InvalidToken",
+        "The provided token is invalid.");
 }
