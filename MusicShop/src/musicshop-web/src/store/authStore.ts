@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/types/auth';
+import Cookies from 'js-cookie';
 
 interface AuthState {
   user: User | null;
@@ -22,11 +23,13 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (user, accessToken) => {
         localStorage.setItem('accessToken', accessToken);
+        Cookies.set('accessToken', accessToken, { expires: 7 }); // Cookie hết hạn sau 7 ngày
         set({ user, accessToken, isAuthenticated: true });
       },
       
       clearAuth: () => {
         localStorage.removeItem('accessToken');
+        Cookies.remove('accessToken');
         set({ user: null, accessToken: null, isAuthenticated: false });
       },
       
