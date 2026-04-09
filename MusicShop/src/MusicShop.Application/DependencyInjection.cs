@@ -19,6 +19,9 @@ public static class DependencyInjection
         // 2. Register FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+        // 3. Register AutoMapper
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
         return services;
     }
 }

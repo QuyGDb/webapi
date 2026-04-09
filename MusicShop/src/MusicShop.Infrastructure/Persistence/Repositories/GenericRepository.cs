@@ -50,6 +50,11 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
         return await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
+    public IQueryable<T> AsQueryable()
+    {
+        return _dbSet.AsQueryable();
+    }
+
     public void Add(T entity)
     {
         _dbSet.Add(entity);
