@@ -4,5 +4,6 @@
     <Project Path="src/MusicShop.Application/MusicShop.Application.csproj" />
     <Project Path="src/MusicShop.Domain/MusicShop.Domain.csproj" />
     <Project Path="src/MusicShop.Infrastructure/MusicShop.Infrastructure.csproj" />
+    <File Path="src/musicshop-web/package.json" />
   </Folder>
 </Solution>
