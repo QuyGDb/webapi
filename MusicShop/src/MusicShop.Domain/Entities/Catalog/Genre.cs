@@ -6,4 +6,7 @@ public class Genre : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
+
+    public ICollection<ArtistGenre> ArtistGenres { get; set; } = new List<ArtistGenre>();
+    public ICollection<ReleaseGenre> ReleaseGenres { get; set; } = new List<ReleaseGenre>();
 }

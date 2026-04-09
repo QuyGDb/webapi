@@ -1,27 +1,35 @@
 using MediatR;
+using MusicShop.Application.Common;
 using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using AutoMapper;
 
 namespace MusicShop.Application.UseCases.Catalog.Genres.Queries.GetGenres;
 
-public sealed class GetGenresQueryHandler(IRepository<Genre> genreRepository)
-    : IRequestHandler<GetGenresQuery, Result<IReadOnlyList<GenreResponse>>>
+public sealed class GetGenresQueryHandler(
+    IRepository<Genre> genreRepository,
+    IMapper mapper)
+    : IRequestHandler<GetGenresQuery, Result<PaginatedResult<GenreResponse>>>
 {
-    public async Task<Result<IReadOnlyList<GenreResponse>>> Handle(
+    public async Task<Result<PaginatedResult<GenreResponse>>> Handle(
         GetGenresQuery request, 
         CancellationToken cancellationToken)
     {
-        (IReadOnlyList<Genre> Items, int TotalCount) genres = await genreRepository.GetPagedAsync(1, 1000); // Fetch all genres for now
+        var (items, totalCount) = await genreRepository.GetPagedAsync(
+            request.PageNumber, 
+            request.PageSize, 
+            cancellationToken: cancellationToken);
 
-        List<GenreResponse> response = genres.Items.Select(g => new GenreResponse
-        {
-            Id = g.Id,
-            Name = g.Name,
-            Slug = g.Slug
-        }).ToList();
+        var dtos = mapper.Map<List<GenreResponse>>(items);
 
-        return Result<IReadOnlyList<GenreResponse>>.Success(response);
+        var result = new PaginatedResult<GenreResponse>(
+            dtos,
+            totalCount,
+            request.PageNumber,
+            request.PageSize);
+
+        return Result<PaginatedResult<GenreResponse>>.Success(result);
     }
 }

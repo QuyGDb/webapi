@@ -1,7 +1,6 @@
 using MediatR;
-using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 
 namespace MusicShop.Application.UseCases.Catalog.Genres.Commands.CreateGenre;
 
-public record CreateGenreCommand(string Name, string Slug) : IRequest<Result<GenreResponse>>;
+public record CreateGenreCommand(string Name, string Slug) : IRequest<Result<Guid>>;
