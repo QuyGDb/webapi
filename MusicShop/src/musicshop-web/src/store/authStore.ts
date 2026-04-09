@@ -23,7 +23,7 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (user, accessToken) => {
         localStorage.setItem('accessToken', accessToken);
-        Cookies.set('accessToken', accessToken, { expires: 7 }); // Cookie hết hạn sau 7 ngày
+        Cookies.set('accessToken', accessToken, { expires: 7 }); // Cookie expires in 7 days
         set({ user, accessToken, isAuthenticated: true });
       },
       

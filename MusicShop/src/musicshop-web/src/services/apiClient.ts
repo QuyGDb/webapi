@@ -10,7 +10,7 @@ const api = axios.create({
 // Request interceptor for API calls
 api.interceptors.request.use(
   (config) => {
-    // Chúng ta lưu token riêng lẻ để Interceptor dễ dàng truy cập
+    // We store the token separately for easy access by the interceptor
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -27,9 +27,10 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // Handle unauthorized errors, e.g., token expiration
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      // Handle refresh token logic here if needed
+      // Implement refresh token logic here if needed
     }
     return Promise.reject(error);
   }

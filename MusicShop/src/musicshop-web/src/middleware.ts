@@ -1,25 +1,25 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Định nghĩa các đường dẫn cần bảo vệ (cần đăng nhập mới vào được)
+// Define routes that require authentication
 const protectedRoutes = ['/profile', '/dashboard', '/orders'];
-// Định nghĩa các đường dẫn dành cho khách (đã đăng nhập thì không vào lại nữa)
+// Define routes for guests only (already logged-in users should be redirected away)
 const authRoutes = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   const { pathname } = request.nextUrl;
 
-  // 1. Kiểm tra nếu vào trang bảo vệ mà chưa có token
+  // 1. Check if the user is accessing a protected route without a token
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
   if (isProtectedRoute && !token) {
     const loginUrl = new URL('/login', request.url);
-    // Lưu lại trang đang định vào để sau khi login xong quay lại (tùy chọn)
+    // Optional: Save the attempted URL to redirect back after login
     // loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. Kiểm tra nếu đã có token mà cố tình vào trang login/register
+  // 2. Check if an authenticated user is trying to access auth routes (login/register)
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL('/', request.url));

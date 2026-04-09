@@ -11,7 +11,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { authService } from '../services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
+import { GoogleLogin } from '@react-oauth/google';
 
+/**
+ * LoginForm component for handling standard and Google authentication.
+ */
 export default function LoginForm() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -25,6 +29,9 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
+  /**
+   * Handles the standard email/password login submission.
+   */
   const onSubmit = async (data: LoginSchema) => {
     setApiError(null);
     const result = await authService.login(data);
@@ -33,21 +40,38 @@ export default function LoginForm() {
       setAuth(result.data.user, result.data.accessToken);
       router.push('/');
     } else {
-      setApiError(result.error?.message || 'Đăng nhập thất bại');
+      setApiError(result.error?.message || 'Login failed');
     }
   };
 
-  const handleGoogleLogin = () => {
-    console.log('Google login clicked');
-    // Logic cho Bước 5 sẽ ở đây
+  /**
+   * Handles successful Google Login response.
+   * @param credentialResponse Contains the Google ID Token (credential)
+   */
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setApiError(null);
+    
+    // The 'credential' field contains the ID Token required by our backend
+    const idToken = credentialResponse.credential;
+    if (!idToken) return;
+
+    const result = await authService.googleLogin(idToken);
+
+    if (result.success && result.data) {
+      // Store user info and token in the global store
+      setAuth(result.data.user, result.data.accessToken);
+      router.push('/');
+    } else {
+      setApiError(result.error?.message || 'Google login failed on server side');
+    }
   };
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Đăng nhập</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
         <CardDescription className="text-center text-neutral-400">
-          Nhập thông tin của bạn để truy cập tài khoản
+          Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -67,9 +91,9 @@ export default function LoginForm() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password">Password</Label>
               <Button variant="link" className="p-0 h-auto text-xs text-neutral-400">
-                Quên mật khẩu?
+                Forgot password?
               </Button>
             </div>
             <Input
@@ -88,7 +112,7 @@ export default function LoginForm() {
             </div>
           )}
           <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting}>
-            {isSubmitting ? 'Đang xử lý...' : 'Đăng nhập'}
+            {isSubmitting ? 'Processing...' : 'Sign In'}
           </Button>
         </form>
 
@@ -97,26 +121,27 @@ export default function LoginForm() {
             <span className="w-full border-t border-neutral-700"></span>
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-neutral-900 px-2 text-neutral-400">Hoặc tiếp tục với</span>
+            <span className="bg-neutral-900 px-2 text-neutral-400">Or continue with</span>
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          type="button"
-          className="w-full border-neutral-700 hover:bg-neutral-800"
-          onClick={handleGoogleLogin}
-        >
-          <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-            <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-          </svg>
-          Google
-        </Button>
+        {/* Standard Google Login Button - Handles Token Flow Automatically */}
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              setApiError('Google login was unsuccessful');
+            }}
+            theme="filled_black"
+            shape="pill"
+            width="384" // Max width of the card
+          />
+        </div>
       </CardContent>
       <CardFooter className="flex flex-wrap items-center justify-center gap-1 text-sm text-neutral-400">
-        Chưa có tài khoản?{' '}
+        Don&apos;t have an account?{' '}
         <Button variant="link" className="p-0 h-auto text-blue-400 hover:text-blue-300">
-          Đăng ký ngay
+          Sign up now
         </Button>
       </CardFooter>
     </Card>

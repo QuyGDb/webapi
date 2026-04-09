@@ -10,7 +10,7 @@ export default function ProfilePage() {
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
 
-  if (!user) return null; // Sẽ được Middleware xử lý, nhưng check cho chắc
+  if (!user) return null; // Handled by middleware, but check for safety
 
   const handleLogout = () => {
     clearAuth();
@@ -20,23 +20,23 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Thông tin cá nhân</h1>
+        <h1 className="text-3xl font-bold">Personal Information</h1>
         
         <Card className="bg-neutral-900 border-neutral-800">
           <CardHeader>
-            <CardTitle className="text-xl">Hồ sơ người dùng</CardTitle>
+            <CardTitle className="text-xl">User Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4 border-b border-neutral-800 pb-4">
-              <span className="text-neutral-400">Họ và tên</span>
+              <span className="text-neutral-400">Full Name</span>
               <span className="col-span-2 font-medium">{user.fullName}</span>
             </div>
             <div className="grid grid-cols-3 gap-4 border-b border-neutral-800 pb-4">
-              <span className="text-neutral-400">Email</span>
+              <span className="text-neutral-400">Email Address</span>
               <span className="col-span-2 font-medium">{user.email}</span>
             </div>
             <div className="grid grid-cols-3 gap-4 border-b border-neutral-800 pb-4">
-              <span className="text-neutral-400">Quyền hạn</span>
+              <span className="text-neutral-400">Account Role</span>
               <span className="col-span-2 capitalize font-medium">{user.role}</span>
             </div>
             
@@ -46,7 +46,7 @@ export default function ProfilePage() {
                 onClick={handleLogout}
                 className="w-full sm:w-auto"
               >
-                Đăng xuất tài khoản
+                Logout Account
               </Button>
             </div>
           </CardContent>

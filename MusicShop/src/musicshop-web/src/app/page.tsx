@@ -14,7 +14,7 @@ export default function Home() {
 
   const handleLogout = () => {
     clearAuth();
-    router.refresh(); // Làm mới trang để Middleware kiểm tra lại
+    router.refresh(); // Refresh the page to trigger middleware check
   };
 
   return (
@@ -36,7 +36,7 @@ export default function Home() {
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout} className="text-neutral-400 hover:text-white">
                   <LogOut className="h-4 w-4 mr-1" />
-                  Thoát
+                  Logout
                 </Button>
               </>
             ) : (
@@ -44,7 +44,7 @@ export default function Home() {
                 href="/login" 
                 className={cn(buttonVariants({ variant: 'default' }), "bg-blue-600 hover:bg-blue-700")}
               >
-                Đăng nhập
+                Sign In
               </Link>
             )}
           </div>
@@ -59,21 +59,21 @@ export default function Home() {
 
         <div className="max-w-3xl space-y-8">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-500">
-            Nơi Tâm Hồn <br /> 
-            Hòa Cùng Giai Điệu
+            Where Your Soul <br /> 
+            Meets the Melody
           </h1>
           
           <p className="text-xl md:text-2xl text-neutral-400 max-w-2xl mx-auto leading-relaxed">
             {isAuthenticated 
-              ? `Chào mừng trở lại, ${user?.fullName}! Bạn đã sẵn sàng khám phá những bộ sưu tập mới chưa?`
-              : "Khám phá hàng ngàn bản ghi vinyl và CD chất lượng cao. Đăng ký ngay để bắt đầu hành trình âm nhạc của bạn."
+              ? `Welcome back, ${user?.fullName}! Are you ready to explore our latest collection?`
+              : "Explore thousands of high-quality vinyl records and CDs. Sign up now to start your musical journey."
             }
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button size="lg" className="w-full sm:w-auto px-8 h-14 text-lg bg-white text-black hover:bg-neutral-200">
               <ShoppingBag className="mr-2 h-5 w-5" />
-              Khám phá cửa hàng
+              Explore Shop
             </Button>
             
             {!isAuthenticated && (
@@ -84,7 +84,7 @@ export default function Home() {
                   "w-full sm:w-auto px-8 h-14 text-lg border-neutral-700 hover:bg-neutral-900"
                 )}
               >
-                Tạo tài khoản mới
+                Create Account
               </Link>
             )}
           </div>
