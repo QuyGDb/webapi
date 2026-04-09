@@ -1,65 +1,56 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MusicShop.API.Infrastructure;
-using MusicShop.Application.UseCases.Catalog.Labels.Commands.CreateLabel;
-using MusicShop.Application.UseCases.Catalog.Labels.Commands.DeleteLabel;
-using MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
-using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabelById;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using MusicShop.Application.Common;
+using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabels;
+using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabelById;
+using MusicShop.Application.UseCases.Catalog.Labels.Commands.CreateLabel;
+using MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
+using MusicShop.Application.UseCases.Catalog.Labels.Commands.DeleteLabel;
+using MusicShop.API.Infrastructure;
 
 namespace MusicShop.API.Controllers;
 
 public class LabelsController(IMediator mediator) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IReadOnlyList<Application.DTOs.Catalog.LabelResponse>>>> GetLabels(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        [FromQuery] string? q = null,
-        [FromQuery] string? country = null)
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<LabelResponse>>>> GetLabels([FromQuery] GetLabelsQuery query)
     {
-        GetLabelsQuery query = new GetLabelsQuery(pageNumber, pageSize, q, country);
-        Domain.Common.Result<Application.Common.PaginatedResult<Application.DTOs.Catalog.LabelResponse>> result = await mediator.Send(query);
-
+        var result = await mediator.Send(query);
         return HandlePaginatedResult(result);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<MusicShop.Application.DTOs.Catalog.LabelResponse>>> GetLabel(Guid id)
+    public async Task<ActionResult<ApiResponse<LabelResponse>>> GetLabel(Guid id)
     {
-        GetLabelByIdQuery query = new GetLabelByIdQuery(id);
-        MusicShop.Domain.Common.Result<MusicShop.Application.DTOs.Catalog.LabelResponse> result = await mediator.Send(query);
-
+        var result = await mediator.Send(new GetLabelByIdQuery(id));
         return HandleResult(result);
     }
 
+    [Authorize(Roles = "admin")]
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<Application.DTOs.Catalog.LabelResponse>>> CreateLabel([FromBody] CreateLabelCommand command)
+    public async Task<ActionResult<ApiResponse<Guid>>> CreateLabel([FromBody] CreateLabelCommand command)
     {
-        Domain.Common.Result<Application.DTOs.Catalog.LabelResponse> result = await mediator.Send(command);
-
-        return HandleCreatedResult(result, nameof(GetLabel), new { id = result.Value?.Id });
+        var result = await mediator.Send(command);
+        return HandleCreatedResult(result, nameof(GetLabel), new { id = result.Value });
     }
 
+    [Authorize(Roles = "admin")]
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<Application.DTOs.Catalog.LabelResponse>>> UpdateLabel(Guid id, [FromBody] UpdateLabelCommand command)
+    public async Task<ActionResult<ApiResponse<Guid>>> UpdateLabel(Guid id, [FromBody] UpdateLabelCommand command)
     {
-        if (id != command.Id)
-        {
-            return BadRequest(ApiResponse<object>.FailureResult("ID_MISMATCH", "Route id does not match the body id."));
-        }
-
-        Domain.Common.Result<Application.DTOs.Catalog.LabelResponse> result = await mediator.Send(command);
-
+        if (id != command.Id) return BadRequest();
+        
+        var result = await mediator.Send(command);
         return HandleResult(result);
     }
 
+    [Authorize(Roles = "admin")]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteLabel(Guid id)
     {
-        DeleteLabelCommand command = new DeleteLabelCommand(id);
-        Domain.Common.Result<bool> result = await mediator.Send(command);
-
+        var result = await mediator.Send(new DeleteLabelCommand(id));
         return HandleNonGenericResult(result);
     }
 }

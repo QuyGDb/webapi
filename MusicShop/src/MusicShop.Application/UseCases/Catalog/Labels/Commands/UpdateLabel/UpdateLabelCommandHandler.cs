@@ -1,8 +1,6 @@
 using MediatR;
-using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
-using MusicShop.Domain.Errors;
 using MusicShop.Domain.Interfaces;
 
 namespace MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
@@ -10,24 +8,16 @@ namespace MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
 public sealed class UpdateLabelCommandHandler(
     IRepository<Label> labelRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateLabelCommand, Result<LabelResponse>>
+    : IRequestHandler<UpdateLabelCommand, Result<Guid>>
 {
-    public async Task<Result<LabelResponse>> Handle(
+    public async Task<Result<Guid>> Handle(
         UpdateLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        Label? label = await labelRepository.GetByIdAsync(request.Id);
+        var label = await labelRepository.GetByIdAsync(request.Id, cancellationToken);
         if (label == null)
         {
-            return Result<LabelResponse>.Failure(LabelErrors.NotFound);
-        }
-
-        Label? existingWithSameName = await labelRepository.FirstOrDefaultAsync(
-            x => x.Name == request.Name && x.Id != request.Id);
-        
-        if (existingWithSameName != null)
-        {
-            return Result<LabelResponse>.Failure(LabelErrors.DuplicateName);
+            return Result<Guid>.Failure(new Error("Label.NotFound", "Label not found."));
         }
 
         label.Name = request.Name;
@@ -38,13 +28,6 @@ public sealed class UpdateLabelCommandHandler(
         labelRepository.Update(label);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<LabelResponse>.Success(new LabelResponse
-        {
-            Id = label.Id,
-            Name = label.Name,
-            Country = label.Country,
-            FoundedYear = label.FoundedYear,
-            Website = label.Website
-        });
+        return Result<Guid>.Success(label.Id);
     }
 }

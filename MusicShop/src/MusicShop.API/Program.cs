@@ -10,11 +10,11 @@ using MusicShop.API.Middleware;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // 1. Setup Logging (Serilog)
-builder.Host.UseSerilog((context, logger) => 
+builder.Host.UseSerilog((context, logger) =>
     logger.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
 
 // 2. Add services to the container
-builder.Services.AddControllers(); 
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

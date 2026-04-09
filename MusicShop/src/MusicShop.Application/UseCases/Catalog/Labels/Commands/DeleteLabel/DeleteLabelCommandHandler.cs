@@ -1,29 +1,37 @@
 using MediatR;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
-using MusicShop.Domain.Errors;
 using MusicShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Labels.Commands.DeleteLabel;
 
 public sealed class DeleteLabelCommandHandler(
     IRepository<Label> labelRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<DeleteLabelCommand, Result<bool>>
+    : IRequestHandler<DeleteLabelCommand, Result>
 {
-    public async Task<Result<bool>> Handle(
+    public async Task<Result> Handle(
         DeleteLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        Label? label = await labelRepository.GetByIdAsync(request.Id);
-        if (label == null)
+        var label = await labelRepository.AsQueryable()
+            .Include(x => x.ReleaseVersions)
+            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+        if (label is null)
         {
-            return Result<bool>.Failure(LabelErrors.NotFound);
+            return Result.Failure(new Error("Label.NotFound", "Label not found."));
+        }
+
+        if (label.ReleaseVersions.Any())
+        {
+            return Result.Failure(new Error("Label.HasAssociations", "Cannot delete label with existing release versions."));
         }
 
         labelRepository.Delete(label);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<bool>.Success(true);
+        return Result.Success();
     }
 }
