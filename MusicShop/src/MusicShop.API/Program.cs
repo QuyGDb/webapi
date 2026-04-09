@@ -11,7 +11,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // 1. Setup Logging (Serilog)
 builder.Host.UseSerilog((context, logger) =>
-    logger.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
+    logger.WriteTo.Console()
+          .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+          .ReadFrom.Configuration(context.Configuration));
 
 // 2. Add services to the container
 builder.Services.AddControllers();

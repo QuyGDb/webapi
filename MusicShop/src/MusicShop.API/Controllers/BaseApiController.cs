@@ -46,15 +46,27 @@ public abstract class BaseApiController : ControllerBase
 
     protected ActionResult MapError(Error error)
     {
-        ApiResponse<object> response = ApiResponse<object>.FailureResult(error.Code, error.Message);
-
-        return error.Code switch
+        int statusCode = error.Code switch
         {
-            string code when code.EndsWith(".NotFound") => NotFound(response),
-            string code when code.EndsWith(".Unauthorized") => Unauthorized(response),
-            string code when code.EndsWith(".Forbidden") => Forbid(),
-            string code when code.EndsWith(".Conflict") => Conflict(response),
-            _ => BadRequest(response)
+            string code when code.EndsWith(".NotFound") => StatusCodes.Status404NotFound,
+            string code when code.EndsWith(".Unauthorized") => StatusCodes.Status401Unauthorized,
+            string code when code.EndsWith(".Forbidden") => StatusCodes.Status403Forbidden,
+            string code when code.EndsWith(".Conflict") => StatusCodes.Status409Conflict,
+            _ => StatusCodes.Status400BadRequest
         };
+
+        return Problem(
+            statusCode: statusCode,
+            title: error.Code,
+            detail: error.Message,
+            type: GetErrorType(statusCode)
+        );
     }
+
+    private static string GetErrorType(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status404NotFound => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+        StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc7231#section-6.5.11",
+        _ => "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+    };
 }
