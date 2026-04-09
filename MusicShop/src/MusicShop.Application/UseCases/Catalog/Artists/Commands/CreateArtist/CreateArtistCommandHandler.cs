@@ -15,14 +15,14 @@ public sealed class CreateArtistCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Check for duplicate name
-        var existing = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
+        Artist? existing = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
         if (existing != null)
         {
             return Result<Guid>.Failure(new Error("Artist.DuplicateName", "Artist with this name already exists."));
         }
 
         // 2. Create Artist entity
-        var artist = new Artist
+        Artist artist = new Artist
         {
             Name = request.Name,
             Bio = request.Bio,
@@ -33,7 +33,7 @@ public sealed class CreateArtistCommandHandler(
         // 3. Handle Genres many-to-many
         if (request.GenreIds != null && request.GenreIds.Any())
         {
-            foreach (var genreId in request.GenreIds)
+            foreach (Guid genreId in request.GenreIds)
             {
                 artist.ArtistGenres.Add(new ArtistGenre
                 {

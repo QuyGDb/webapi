@@ -14,7 +14,7 @@ public sealed class DeleteReleaseVersionCommandHandler(
         DeleteReleaseVersionCommand request, 
         CancellationToken cancellationToken)
     {
-        var version = await releaseVersionRepository.GetByIdAsync(request.Id, cancellationToken);
+        ReleaseVersion? version = await releaseVersionRepository.GetByIdAsync(request.Id, cancellationToken);
         if (version == null)
             return Result.Failure(new Error("ReleaseVersion.NotFound", "Release version not found."));
 

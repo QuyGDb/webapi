@@ -15,12 +15,12 @@ public sealed class GetReleaseVersionsByReleaseQueryHandler(IRepository<ReleaseV
         GetReleaseVersionsByReleaseQuery request, 
         CancellationToken cancellationToken)
     {
-        var versions = await releaseVersionRepository.AsQueryable()
+        List<ReleaseVersion> versions = await releaseVersionRepository.AsQueryable()
             .Include(v => v.Label)
             .Where(v => v.ReleaseId == request.ReleaseId)
             .ToListAsync(cancellationToken);
 
-        var dtos = versions.Select(v => v.ToDto()).ToList();
+        List<ReleaseVersionDto> dtos = versions.Select(v => v.ToDto()).ToList();
 
         return Result<IReadOnlyList<ReleaseVersionDto>>.Success(dtos.AsReadOnly());
     }

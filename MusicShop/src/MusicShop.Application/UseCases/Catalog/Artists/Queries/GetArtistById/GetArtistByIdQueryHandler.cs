@@ -14,14 +14,14 @@ public sealed class GetArtistByIdQueryHandler(IArtistRepository artistRepository
         GetArtistByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var artist = await artistRepository.GetWithGenresAsync(request.Id, cancellationToken);
+        Artist? artist = await artistRepository.GetWithGenresAsync(request.Id, cancellationToken);
 
         if (artist == null)
         {
             return Result<ArtistResponse>.Failure(new Error("Artist.NotFound", "Artist not found."));
         }
 
-        var response = artist.ToResponse();
+        ArtistResponse response = artist.ToResponse();
 
         return Result<ArtistResponse>.Success(response);
     }

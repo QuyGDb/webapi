@@ -14,7 +14,7 @@ public sealed class UpdateLabelCommandHandler(
         UpdateLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        var label = await labelRepository.GetByIdAsync(request.Id, cancellationToken);
+        Label? label = await labelRepository.GetByIdAsync(request.Id, cancellationToken);
         if (label == null)
         {
             return Result<Guid>.Failure(new Error("Label.NotFound", "Label not found."));

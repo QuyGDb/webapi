@@ -16,7 +16,7 @@ public sealed class DeleteReleaseCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Fetch with Versions to check associations
-        var release = await releaseRepository.AsQueryable()
+        Release? release = await releaseRepository.AsQueryable()
             .Include(r => r.Versions)
             .Include(r => r.Tracks)
             .Include(r => r.ReleaseGenres)

@@ -17,7 +17,7 @@ public sealed class GetReleasesQueryHandler(IRepository<Release> releaseReposito
         GetReleasesQuery request,
         CancellationToken cancellationToken)
     {
-        var query = releaseRepository.AsQueryable();
+        IQueryable<Release> query = releaseRepository.AsQueryable();
 
         // 1. Filtering
         if (!string.IsNullOrWhiteSpace(request.Q))
@@ -42,17 +42,17 @@ public sealed class GetReleasesQueryHandler(IRepository<Release> releaseReposito
 
         if (!string.IsNullOrWhiteSpace(request.Format))
         {
-            if (Enum.TryParse<ReleaseFormat>(request.Format, true, out var formatEnum))
+            if (Enum.TryParse<ReleaseFormat>(request.Format, true, out ReleaseFormat formatEnum))
             {
                 query = query.Where(r => r.Versions.Any(v => v.Format == formatEnum));
             }
         }
 
         // 2. Count Total
-        var totalCount = await query.CountAsync(cancellationToken);
+        int totalCount = await query.CountAsync(cancellationToken);
 
         // 3. Paging and Projection
-        var items = await query
+        List<Release> items = await query
             .Include(r => r.Artist)
             .Include(r => r.ReleaseGenres)
                 .ThenInclude(rg => rg.Genre)
@@ -62,9 +62,9 @@ public sealed class GetReleasesQueryHandler(IRepository<Release> releaseReposito
             .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        var dtos = items.Select(r => r.ToResponse()).ToList();
+        List<ReleaseResponse> dtos = items.Select(r => r.ToResponse()).ToList();
 
-        var result = new PaginatedResult<ReleaseResponse>(
+        PaginatedResult<ReleaseResponse> result = new PaginatedResult<ReleaseResponse>(
             dtos,
             totalCount,
             request.PageNumber,

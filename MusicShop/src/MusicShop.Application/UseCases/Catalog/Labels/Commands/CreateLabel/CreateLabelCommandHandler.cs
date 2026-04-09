@@ -14,7 +14,7 @@ public sealed class CreateLabelCommandHandler(
         CreateLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        var label = new Label
+        Label label = new Label
         {
             Name = request.Name,
             Country = request.Country,

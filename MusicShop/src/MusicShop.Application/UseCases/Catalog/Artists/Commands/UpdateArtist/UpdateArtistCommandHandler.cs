@@ -16,7 +16,7 @@ public sealed class UpdateArtistCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Fetch artist including Genres
-        var artist = await artistRepository.AsQueryable()
+        Artist? artist = await artistRepository.AsQueryable()
             .Include(x => x.ArtistGenres)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
@@ -26,7 +26,7 @@ public sealed class UpdateArtistCommandHandler(
         }
 
         // 2. Check for duplicate name
-        var existingWithSameName = await artistRepository.FirstOrDefaultAsync(
+        Artist? existingWithSameName = await artistRepository.FirstOrDefaultAsync(
             x => x.Name == request.Name && x.Id != request.Id, cancellationToken);
         
         if (existingWithSameName != null)
@@ -44,7 +44,7 @@ public sealed class UpdateArtistCommandHandler(
         if (request.GenreIds != null)
         {
             artist.ArtistGenres.Clear();
-            foreach (var genreId in request.GenreIds)
+            foreach (Guid genreId in request.GenreIds)
             {
                 artist.ArtistGenres.Add(new ArtistGenre { GenreId = genreId });
             }

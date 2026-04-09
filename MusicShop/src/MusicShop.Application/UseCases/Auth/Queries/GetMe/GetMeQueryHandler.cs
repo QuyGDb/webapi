@@ -20,12 +20,12 @@ public class GetMeQueryHandler(
             return Result<UserResponse>.Failure(AuthErrors.Unauthorized);
         }
 
-        if (!Guid.TryParse(currentUserService.UserId, out var userId))
+        if (!Guid.TryParse(currentUserService.UserId, out Guid userId))
         {
             return Result<UserResponse>.Failure(AuthErrors.InvalidUserId);
         }
 
-        var user = await userRepository.GetByIdAsync(userId, cancellationToken);
+        User? user = await userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null)
         {
             return Result<UserResponse>.Failure(AuthErrors.UserNotFound);

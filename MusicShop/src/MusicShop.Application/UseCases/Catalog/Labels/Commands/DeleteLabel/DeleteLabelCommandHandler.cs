@@ -15,7 +15,7 @@ public sealed class DeleteLabelCommandHandler(
         DeleteLabelCommand request, 
         CancellationToken cancellationToken)
     {
-        var label = await labelRepository.AsQueryable()
+        Label? label = await labelRepository.AsQueryable()
             .Include(x => x.ReleaseVersions)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 

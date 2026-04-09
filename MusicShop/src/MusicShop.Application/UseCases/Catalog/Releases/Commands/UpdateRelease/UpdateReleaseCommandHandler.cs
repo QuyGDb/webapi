@@ -3,6 +3,7 @@ using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.UpdateRelease;
 
@@ -17,7 +18,7 @@ public sealed class UpdateReleaseCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Fetch Release with all related data
-        var release = await releaseRepository.AsQueryable()
+        Release? release = await releaseRepository.AsQueryable()
             .Include(r => r.ReleaseGenres)
             .Include(r => r.Tracks)
             .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
@@ -30,7 +31,7 @@ public sealed class UpdateReleaseCommandHandler(
         // 2. Verify Artist exists if changed
         if (release.ArtistId != request.ArtistId)
         {
-            var artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
+            Artist? artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
             if (artist == null)
             {
                 return Result<Guid>.Failure(new Error("Artist.NotFound", "New artist not found."));
@@ -49,7 +50,7 @@ public sealed class UpdateReleaseCommandHandler(
         if (request.GenreIds != null)
         {
             release.ReleaseGenres.Clear();
-            foreach (var genreId in request.GenreIds)
+            foreach (Guid genreId in request.GenreIds)
             {
                 release.ReleaseGenres.Add(new ReleaseGenre { GenreId = genreId });
             }
@@ -59,7 +60,7 @@ public sealed class UpdateReleaseCommandHandler(
         if (request.Tracks != null)
         {
             release.Tracks.Clear();
-            foreach (var trackDto in request.Tracks)
+            foreach (TrackCreateDto trackDto in request.Tracks)
             {
                 release.Tracks.Add(new Track
                 {

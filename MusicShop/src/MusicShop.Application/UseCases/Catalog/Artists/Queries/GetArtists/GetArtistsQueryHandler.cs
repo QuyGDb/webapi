@@ -16,7 +16,7 @@ public sealed class GetArtistsQueryHandler(IArtistRepository artistRepository)
         GetArtistsQuery request,
         CancellationToken cancellationToken)
     {
-        var query = artistRepository.AsQueryable();
+        IQueryable<Artist> query = artistRepository.AsQueryable();
 
         // 1. Apply Filtering
         if (!string.IsNullOrWhiteSpace(request.Q))
@@ -30,9 +30,9 @@ public sealed class GetArtistsQueryHandler(IArtistRepository artistRepository)
         }
 
         // 2. Wrap into TotalCount and Paging
-        var totalCount = await query.CountAsync(cancellationToken);
+        int totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        List<Artist> items = await query
             .Include(a => a.ArtistGenres)
                 .ThenInclude(ag => ag.Genre)
             .OrderBy(a => a.Name)
@@ -40,10 +40,10 @@ public sealed class GetArtistsQueryHandler(IArtistRepository artistRepository)
             .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        var dtos = items.Select(a => a.ToResponse()).ToList();
+        List<ArtistResponse> dtos = items.Select(a => a.ToResponse()).ToList();
 
         // 3. Wrap result
-        var result = new PaginatedResult<ArtistResponse>(
+        PaginatedResult<ArtistResponse> result = new PaginatedResult<ArtistResponse>(
             dtos,
             totalCount,
             request.PageNumber,

@@ -15,7 +15,7 @@ public sealed class DeleteArtistCommandHandler(
         DeleteArtistCommand request, 
         CancellationToken cancellationToken)
     {
-        var artist = await artistRepository.AsQueryable()
+        Artist? artist = await artistRepository.AsQueryable()
             .Include(x => x.Releases)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 

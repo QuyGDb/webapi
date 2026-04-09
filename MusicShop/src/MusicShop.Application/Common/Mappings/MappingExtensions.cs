@@ -1,6 +1,7 @@
 using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Application.DTOs.Auth;
 using MusicShop.Domain.Entities.Catalog;
+using MusicShop.Domain.Entities.Shop;
 using MusicShop.Domain.Entities.System;
 
 namespace MusicShop.Application.Common.Mappings;
@@ -81,7 +82,7 @@ public static class MappingExtensions
     // Release Versions
     public static ReleaseVersionDto ToDto(this ReleaseVersion version)
     {
-        var variants = version.Products.SelectMany(p => p.Variants).ToList();
+        List<ProductVariant> variants = version.Products.SelectMany(p => p.Variants).ToList();
 
         return new ReleaseVersionDto
         {

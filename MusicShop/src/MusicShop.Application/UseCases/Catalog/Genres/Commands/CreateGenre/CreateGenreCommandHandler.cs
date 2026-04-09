@@ -20,7 +20,7 @@ public sealed class CreateGenreCommandHandler(
             return Result<Guid>.Failure(new Error("Genre.DuplicateSlug", "Slug already exists."));
         }
 
-        var genre = new Genre
+        Genre genre = new Genre
         {
             Name = request.Name,
             Slug = request.Slug

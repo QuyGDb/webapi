@@ -11,7 +11,7 @@ public sealed class UpdateGenreCommandHandler(
 {
     public async Task<Result<Guid>> Handle(UpdateGenreCommand request, CancellationToken cancellationToken)
     {
-        var genre = await genreRepository.GetByIdAsync(request.Id, cancellationToken);
+        Genre? genre = await genreRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (genre is null)
         {

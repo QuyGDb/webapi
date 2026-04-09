@@ -12,7 +12,7 @@ public sealed class DeleteGenreCommandHandler(
 {
     public async Task<Result> Handle(DeleteGenreCommand request, CancellationToken cancellationToken)
     {
-        var genre = await genreRepository.AsQueryable()
+        Genre? genre = await genreRepository.AsQueryable()
             .Include(x => x.ArtistGenres)
             .Include(x => x.ReleaseGenres)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

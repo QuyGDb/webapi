@@ -22,20 +22,20 @@ public sealed class SearchCatalogQueryHandler(
             return Result<CatalogSearchResult>.Success(new CatalogSearchResult());
         }
 
-        var searchTerm = request.Q.ToLower();
+        string searchTerm = request.Q.ToLower();
 
         // 1. Search Artists
-        var artists = await artistRepository.AsQueryable()
+        List<Artist> artists = await artistRepository.AsQueryable()
             .Include(a => a.ArtistGenres)
                 .ThenInclude(ag => ag.Genre)
             .Where(a => a.Name.ToLower().Contains(searchTerm))
             .Take(5)
             .ToListAsync(cancellationToken);
 
-        var artistDtos = artists.Select(a => a.ToResponse()).ToList();
+        List<ArtistResponse> artistDtos = artists.Select(a => a.ToResponse()).ToList();
 
         // 2. Search Releases
-        var releases = await releaseRepository.AsQueryable()
+        List<Release> releases = await releaseRepository.AsQueryable()
             .Include(r => r.Artist)
             .Include(r => r.ReleaseGenres)
                 .ThenInclude(rg => rg.Genre)
@@ -43,9 +43,9 @@ public sealed class SearchCatalogQueryHandler(
             .Take(10)
             .ToListAsync(cancellationToken);
 
-        var releaseDtos = releases.Select(r => r.ToResponse()).ToList();
+        List<ReleaseResponse> releaseDtos = releases.Select(r => r.ToResponse()).ToList();
 
-        var result = new CatalogSearchResult
+        CatalogSearchResult result = new CatalogSearchResult
         {
             Artists = artistDtos,
             Releases = releaseDtos

@@ -16,14 +16,14 @@ public sealed class UpdateReleaseVersionCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Fetch Version
-        var version = await releaseVersionRepository.GetByIdAsync(request.Id, cancellationToken);
+        ReleaseVersion? version = await releaseVersionRepository.GetByIdAsync(request.Id, cancellationToken);
         if (version == null)
             return Result<Guid>.Failure(new Error("ReleaseVersion.NotFound", "Release version not found."));
 
         // 2. Verify Label if changed
         if (version.LabelId != request.LabelId)
         {
-            var label = await labelRepository.GetByIdAsync(request.LabelId, cancellationToken);
+            Label? label = await labelRepository.GetByIdAsync(request.LabelId, cancellationToken);
             if (label == null)
                 return Result<Guid>.Failure(new Error("Label.NotFound", "Label not found."));
             

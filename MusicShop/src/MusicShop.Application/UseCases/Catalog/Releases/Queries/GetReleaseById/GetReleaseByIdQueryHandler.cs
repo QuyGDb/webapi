@@ -15,7 +15,7 @@ public sealed class GetReleaseByIdQueryHandler(IRepository<Release> releaseRepos
         GetReleaseByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var release = await releaseRepository.AsQueryable()
+        Release? release = await releaseRepository.AsQueryable()
             .Include(r => r.Artist)
             .Include(r => r.ReleaseGenres)
                 .ThenInclude(rg => rg.Genre)
@@ -32,7 +32,7 @@ public sealed class GetReleaseByIdQueryHandler(IRepository<Release> releaseRepos
             return Result<ReleaseDetailResponse>.Failure(new Error("Release.NotFound", "Release not found."));
         }
 
-        var response = release.ToDetailResponse();
+        ReleaseDetailResponse response = release.ToDetailResponse();
 
         return Result<ReleaseDetailResponse>.Success(response);
     }

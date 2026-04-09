@@ -16,14 +16,14 @@ public sealed class CreateReleaseCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Verify Artist exists
-        var artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
+        Artist? artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
         if (artist == null)
         {
             return Result<Guid>.Failure(new Error("Artist.NotFound", "Artist not found."));
         }
 
         // 2. Map Command to Entity
-        var release = new Release
+        Release release = new Release
         {
             Title = request.Title,
             Year = request.Year,
@@ -36,7 +36,7 @@ public sealed class CreateReleaseCommandHandler(
         // 3. Add Genres
         if (request.GenreIds != null)
         {
-            foreach (var genreId in request.GenreIds)
+            foreach (Guid genreId in request.GenreIds)
             {
                 release.ReleaseGenres.Add(new ReleaseGenre { GenreId = genreId });
             }
@@ -45,7 +45,7 @@ public sealed class CreateReleaseCommandHandler(
         // 4. Add Tracks
         if (request.Tracks != null)
         {
-            foreach (var trackDto in request.Tracks)
+            foreach (TrackCreateDto trackDto in request.Tracks)
             {
                 release.Tracks.Add(new Track
                 {

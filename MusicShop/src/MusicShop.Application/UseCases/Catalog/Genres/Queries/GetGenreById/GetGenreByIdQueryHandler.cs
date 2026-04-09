@@ -12,7 +12,7 @@ public sealed class GetGenreByIdQueryHandler(IRepository<Genre> genreRepository)
 {
     public async Task<Result<GenreResponse>> Handle(GetGenreByIdQuery request, CancellationToken cancellationToken)
     {
-        var genre = await genreRepository.GetByIdAsync(request.Id, cancellationToken);
+        Genre? genre = await genreRepository.GetByIdAsync(request.Id, cancellationToken);
 
         return Result<GenreResponse>.Success(genre!.ToResponse());
     }

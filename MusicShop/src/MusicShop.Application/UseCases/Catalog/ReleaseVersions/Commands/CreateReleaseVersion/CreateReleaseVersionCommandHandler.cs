@@ -17,17 +17,17 @@ public sealed class CreateReleaseVersionCommandHandler(
         CancellationToken cancellationToken)
     {
         // 1. Verify Release
-        var release = await releaseRepository.GetByIdAsync(request.ReleaseId, cancellationToken);
+        Release? release = await releaseRepository.GetByIdAsync(request.ReleaseId, cancellationToken);
         if (release == null)
             return Result<Guid>.Failure(new Error("Release.NotFound", "Release not found."));
 
         // 2. Verify Label
-        var label = await labelRepository.GetByIdAsync(request.LabelId, cancellationToken);
+        Label? label = await labelRepository.GetByIdAsync(request.LabelId, cancellationToken);
         if (label == null)
             return Result<Guid>.Failure(new Error("Label.NotFound", "Label not found."));
 
         // 3. Create Version
-        var version = new ReleaseVersion
+        ReleaseVersion version = new ReleaseVersion
         {
             ReleaseId = request.ReleaseId,
             LabelId = request.LabelId,
