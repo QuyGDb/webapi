@@ -1,0 +1,17 @@
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using MusicShop.API.Infrastructure;
+using MusicShop.Application.DTOs.Catalog;
+using MusicShop.Application.UseCases.Catalog.CatalogSearch;
+
+namespace MusicShop.API.Controllers;
+
+public class CatalogController(IMediator mediator) : BaseApiController
+{
+    [HttpGet("search")]
+    public async Task<ActionResult<ApiResponse<CatalogSearchResult>>> Search([FromQuery] string q)
+    {
+        var result = await mediator.Send(new SearchCatalogQuery(q));
+        return HandleResult(result);
+    }
+}
