@@ -1,4 +1,5 @@
 using MediatR;
+using MusicShop.Application.Common.Mappings;
 using MusicShop.Application.DTOs.Auth;
 using MusicShop.Domain.Entities.System;
 using MusicShop.Domain.Common;
@@ -80,15 +81,6 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<AuthResponse>.Success(new AuthResponse
-        {
-            AccessToken = accessToken,
-            RefreshToken = newRefreshToken,
-            AccessTokenExpiresAt = accessTokenExpiresAtUtc,
-            UserId = user.Id,
-            Email = user.Email,
-            FullName = user.FullName,
-            Role = user.Role.ToString()
-        });
+        return Result<AuthResponse>.Success(user.ToAuthResponse(accessToken, newRefreshToken, accessTokenExpiresAtUtc));
     }
 }

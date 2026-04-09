@@ -1,4 +1,5 @@
 using MediatR;
+using MusicShop.Application.Common.Mappings;
 using MusicShop.Application.DTOs.Auth;
 using MusicShop.Domain.Entities.System;
 using MusicShop.Domain.Common;
@@ -56,15 +57,6 @@ public class RegisterCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Return the AuthResponse containing user info and token
-        return Result<AuthResponse>.Success(new AuthResponse
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            AccessTokenExpiresAt = accessTokenExpiresAtUtc,
-            UserId = newUser.Id,
-            Email = newUser.Email,
-            FullName = newUser.FullName,
-            Role = newUser.Role.ToString()
-        });
+        return Result<AuthResponse>.Success(newUser.ToAuthResponse(accessToken, refreshToken, accessTokenExpiresAtUtc));
     }
 }

@@ -1,5 +1,7 @@
 using MusicShop.Application.DTOs.Catalog;
+using MusicShop.Application.DTOs.Auth;
 using MusicShop.Domain.Entities.Catalog;
+using MusicShop.Domain.Entities.System;
 
 namespace MusicShop.Application.Common.Mappings;
 
@@ -105,6 +107,37 @@ public static class MappingExtensions
             Position = track.Position,
             DurationSeconds = track.DurationSeconds,
             Side = track.Side
+        };
+    }
+
+    // Users
+    public static UserResponse ToResponse(this User user)
+    {
+        return new UserResponse
+        {
+            UserId = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Role = user.Role.ToString(),
+            CreatedAt = user.CreatedAt
+        };
+    }
+
+    public static AuthResponse ToAuthResponse(
+        this User user, 
+        string accessToken, 
+        string refreshToken, 
+        DateTime accessTokenExpiresAtUtc)
+    {
+        return new AuthResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpiresAt = accessTokenExpiresAtUtc,
+            UserId = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Role = user.Role.ToString()
         };
     }
 }

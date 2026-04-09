@@ -1,5 +1,6 @@
 using MediatR;
 using MusicShop.Application.Common.Interfaces;
+using MusicShop.Application.Common.Mappings;
 using MusicShop.Application.DTOs.Auth;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.System;
@@ -30,13 +31,6 @@ public class GetMeQueryHandler(
             return Result<UserResponse>.Failure(AuthErrors.UserNotFound);
         }
 
-        return Result<UserResponse>.Success(new UserResponse
-        {
-            UserId = user.Id,
-            Email = user.Email,
-            FullName = user.FullName,
-            Role = user.Role.ToString(),
-            CreatedAt = user.CreatedAt
-        });
+        return Result<UserResponse>.Success(user.ToResponse());
     }
 }
