@@ -23,6 +23,5 @@ public class ReleaseVersion : BaseEntity
     public Label Label { get; set; } = null!;
 
     // Navigation
-    // Tracklist is attached to Release (Master) in ERD, but some entities might keep it here if version-specific.
-    // ERD says tracks belong to releases (original), so I'll move them later.
+    public virtual ICollection<MusicShop.Domain.Entities.Shop.Product> Products { get; set; } = new List<MusicShop.Domain.Entities.Shop.Product>();
 }

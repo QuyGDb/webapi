@@ -1,8 +1,6 @@
 using MediatR;
-using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
-using MusicShop.Domain.Errors;
 using MusicShop.Domain.Interfaces;
 
 namespace MusicShop.Application.UseCases.Catalog.ReleaseVersions.Commands.CreateReleaseVersion;
@@ -10,26 +8,26 @@ namespace MusicShop.Application.UseCases.Catalog.ReleaseVersions.Commands.Create
 public sealed class CreateReleaseVersionCommandHandler(
     IRepository<Release> releaseRepository,
     IRepository<Label> labelRepository,
-    IReleaseVersionRepository releaseVersionRepository,
+    IRepository<ReleaseVersion> releaseVersionRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateReleaseVersionCommand, Result<ReleaseVersionDto>>
+    : IRequestHandler<CreateReleaseVersionCommand, Result<Guid>>
 {
-    public async Task<Result<ReleaseVersionDto>> Handle(
+    public async Task<Result<Guid>> Handle(
         CreateReleaseVersionCommand request, 
         CancellationToken cancellationToken)
     {
         // 1. Verify Release
-        Release? release = await releaseRepository.GetByIdAsync(request.ReleaseId);
+        var release = await releaseRepository.GetByIdAsync(request.ReleaseId, cancellationToken);
         if (release == null)
-            return Result<ReleaseVersionDto>.Failure(ReleaseErrors.NotFound);
+            return Result<Guid>.Failure(new Error("Release.NotFound", "Release not found."));
 
         // 2. Verify Label
-        Label? label = await labelRepository.GetByIdAsync(request.LabelId);
+        var label = await labelRepository.GetByIdAsync(request.LabelId, cancellationToken);
         if (label == null)
-            return Result<ReleaseVersionDto>.Failure(LabelErrors.NotFound);
+            return Result<Guid>.Failure(new Error("Label.NotFound", "Label not found."));
 
         // 3. Create Version
-        ReleaseVersion version = new ReleaseVersion
+        var version = new ReleaseVersion
         {
             ReleaseId = request.ReleaseId,
             LabelId = request.LabelId,
@@ -43,15 +41,6 @@ public sealed class CreateReleaseVersionCommandHandler(
         releaseVersionRepository.Add(version);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<ReleaseVersionDto>.Success(new ReleaseVersionDto
-        {
-            Id = version.Id,
-            PressingCountry = version.PressingCountry,
-            PressingYear = version.PressingYear,
-            Format = version.Format.ToString().ToLower(),
-            CatalogNumber = version.CatalogNumber,
-            Notes = version.Notes,
-            LabelName = label.Name
-        });
+        return Result<Guid>.Success(version.Id);
     }
 }

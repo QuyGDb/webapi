@@ -1,0 +1,79 @@
+using MediatR;
+using MusicShop.Domain.Common;
+using MusicShop.Domain.Entities.Catalog;
+using MusicShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.UpdateRelease;
+
+public sealed class UpdateReleaseCommandHandler(
+    IRepository<Release> releaseRepository,
+    IRepository<Artist> artistRepository,
+    IUnitOfWork unitOfWork)
+    : IRequestHandler<UpdateReleaseCommand, Result<Guid>>
+{
+    public async Task<Result<Guid>> Handle(
+        UpdateReleaseCommand request,
+        CancellationToken cancellationToken)
+    {
+        // 1. Fetch Release with all related data
+        var release = await releaseRepository.AsQueryable()
+            .Include(r => r.ReleaseGenres)
+            .Include(r => r.Tracks)
+            .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+
+        if (release == null)
+        {
+            return Result<Guid>.Failure(new Error("Release.NotFound", "Release not found."));
+        }
+
+        // 2. Verify Artist exists if changed
+        if (release.ArtistId != request.ArtistId)
+        {
+            var artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
+            if (artist == null)
+            {
+                return Result<Guid>.Failure(new Error("Artist.NotFound", "New artist not found."));
+            }
+            release.ArtistId = request.ArtistId;
+        }
+
+        // 3. Update Basic Info
+        release.Title = request.Title;
+        release.Year = request.Year;
+        release.Type = request.Type;
+        release.CoverUrl = request.CoverUrl;
+        release.Description = request.Description;
+
+        // 4. Update Genres (Sync)
+        if (request.GenreIds != null)
+        {
+            release.ReleaseGenres.Clear();
+            foreach (var genreId in request.GenreIds)
+            {
+                release.ReleaseGenres.Add(new ReleaseGenre { GenreId = genreId });
+            }
+        }
+
+        // 5. Update Tracks (Sync)
+        if (request.Tracks != null)
+        {
+            release.Tracks.Clear();
+            foreach (var trackDto in request.Tracks)
+            {
+                release.Tracks.Add(new Track
+                {
+                    Title = trackDto.Title,
+                    Position = trackDto.Position,
+                    DurationSeconds = trackDto.DurationSeconds,
+                    Side = trackDto.Side
+                });
+            }
+        }
+
+        releaseRepository.Update(release);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<Guid>.Success(release.Id);
+    }
+}

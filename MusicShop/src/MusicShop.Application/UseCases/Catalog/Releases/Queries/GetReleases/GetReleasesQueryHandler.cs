@@ -2,47 +2,71 @@ using MediatR;
 using MusicShop.Application.Common;
 using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
+using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using MusicShop.Domain.Enums;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleases;
 
-public sealed class GetReleasesQueryHandler(IReleaseRepository releaseRepository)
+public sealed class GetReleasesQueryHandler(
+    IRepository<Release> releaseRepository,
+    IMapper mapper)
     : IRequestHandler<GetReleasesQuery, Result<PaginatedResult<ReleaseResponse>>>
 {
     public async Task<Result<PaginatedResult<ReleaseResponse>>> Handle(
-        GetReleasesQuery request, 
+        GetReleasesQuery request,
         CancellationToken cancellationToken)
     {
-        (IReadOnlyList<MusicShop.Domain.Entities.Catalog.Release> items, int total) = await releaseRepository.GetPagedWithFiltersAsync(
-            request.PageNumber,
-            request.PageSize,
-            request.ArtistId,
-            request.GenreSlug,
-            request.Year,
-            request.Q,
-            cancellationToken);
+        var query = releaseRepository.AsQueryable();
 
-        List<ReleaseResponse> responseItems = items.Select(r => new ReleaseResponse
+        // 1. Filtering
+        if (!string.IsNullOrWhiteSpace(request.Q))
         {
-            Id = r.Id,
-            Title = r.Title,
-            Year = r.Year,
-            CoverUrl = r.CoverUrl,
-            Description = r.Description,
-            ArtistId = r.ArtistId,
-            ArtistName = r.Artist?.Name ?? string.Empty,
-            Genres = r.ReleaseGenres.Select(rg => new GenreResponse
-            {
-                Id = rg.GenreId,
-                Name = rg.Genre?.Name ?? string.Empty,
-                Slug = rg.Genre?.Slug ?? string.Empty
-            }).ToList()
-        }).ToList();
+            query = query.Where(r => r.Title.Contains(request.Q));
+        }
 
-        PaginatedResult<ReleaseResponse> result = new PaginatedResult<ReleaseResponse>(
-            responseItems, 
-            total, 
-            request.PageNumber, 
+        if (request.ArtistId.HasValue)
+        {
+            query = query.Where(r => r.ArtistId == request.ArtistId.Value);
+        }
+
+        if (request.GenreId.HasValue)
+        {
+            query = query.Where(r => r.ReleaseGenres.Any(rg => rg.GenreId == request.GenreId.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Type))
+        {
+            query = query.Where(r => r.Type == request.Type);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Format))
+        {
+            if (Enum.TryParse<ReleaseFormat>(request.Format, true, out var formatEnum))
+            {
+                query = query.Where(r => r.Versions.Any(v => v.Format == formatEnum));
+            }
+        }
+
+        // 2. Count Total
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        // 3. Paging and Projection
+        var items = await query
+            .OrderByDescending(r => r.Year)
+            .ThenBy(r => r.Title)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ProjectTo<ReleaseResponse>(mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
+
+        var result = new PaginatedResult<ReleaseResponse>(
+            items,
+            totalCount,
+            request.PageNumber,
             request.PageSize);
 
         return Result<PaginatedResult<ReleaseResponse>>.Success(result);

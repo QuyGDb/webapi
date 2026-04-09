@@ -1,56 +1,40 @@
 using MediatR;
 using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
-using MusicShop.Domain.Errors;
+using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleaseById;
 
-public sealed class GetReleaseByIdQueryHandler(IReleaseRepository releaseRepository)
+public sealed class GetReleaseByIdQueryHandler(
+    IRepository<Release> releaseRepository,
+    IMapper mapper)
     : IRequestHandler<GetReleaseByIdQuery, Result<ReleaseDetailResponse>>
 {
     public async Task<Result<ReleaseDetailResponse>> Handle(
-        GetReleaseByIdQuery request, 
+        GetReleaseByIdQuery request,
         CancellationToken cancellationToken)
     {
-        MusicShop.Domain.Entities.Catalog.Release? release = await releaseRepository.GetWithDetailsAsync(request.Id, cancellationToken);
-        if (release == null)
-            return Result<ReleaseDetailResponse>.Failure(ReleaseErrors.NotFound);
+        var release = await releaseRepository.AsQueryable()
+            .Include(r => r.Artist)
+            .Include(r => r.ReleaseGenres)
+                .ThenInclude(rg => rg.Genre)
+            .Include(r => r.Tracks)
+            .Include(r => r.Versions)
+                .ThenInclude(v => v.Label)
+            .Include(r => r.Versions)
+                .ThenInclude(v => v.Products)
+                    .ThenInclude(p => p.Variants)
+            .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
 
-        ReleaseDetailResponse response = new ReleaseDetailResponse
+        if (release == null)
         {
-            Id = release.Id,
-            Title = release.Title,
-            Year = release.Year,
-            CoverUrl = release.CoverUrl,
-            Description = release.Description,
-            ArtistId = release.ArtistId,
-            ArtistName = release.Artist?.Name ?? string.Empty,
-            Genres = release.ReleaseGenres.Select(rg => new GenreResponse
-            {
-                Id = rg.GenreId,
-                Name = rg.Genre?.Name ?? string.Empty,
-                Slug = rg.Genre?.Slug ?? string.Empty
-            }).ToList(),
-            Tracks = release.Tracks.Select(t => new TrackDto
-            {
-                Id = t.Id,
-                Position = t.Position,
-                Title = t.Title,
-                DurationSeconds = t.DurationSeconds,
-                Side = t.Side
-            }).ToList(),
-            Versions = release.Versions.Select(v => new ReleaseVersionDto
-            {
-                Id = v.Id,
-                PressingCountry = v.PressingCountry,
-                PressingYear = v.PressingYear,
-                Format = v.Format.ToString().ToLower(),
-                CatalogNumber = v.CatalogNumber,
-                Notes = v.Notes,
-                LabelName = v.Label?.Name ?? string.Empty
-            }).ToList()
-        };
+            return Result<ReleaseDetailResponse>.Failure(new Error("Release.NotFound", "Release not found."));
+        }
+
+        var response = mapper.Map<ReleaseDetailResponse>(release);
 
         return Result<ReleaseDetailResponse>.Success(response);
     }

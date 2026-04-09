@@ -9,4 +9,8 @@ public class ReleaseVersionDto
     public string? CatalogNumber { get; set; }
     public string? Notes { get; set; }
     public string LabelName { get; set; } = string.Empty;
+
+    // Shop Integration properties
+    public decimal? Price { get; set; }
+    public int? StockQty { get; set; }
 }

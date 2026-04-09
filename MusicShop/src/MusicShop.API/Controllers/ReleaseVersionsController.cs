@@ -2,7 +2,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicShop.Application.UseCases.Catalog.ReleaseVersions.Commands.CreateReleaseVersion;
+using MusicShop.Application.UseCases.Catalog.ReleaseVersions.Commands.UpdateReleaseVersion;
+using MusicShop.Application.UseCases.Catalog.ReleaseVersions.Commands.DeleteReleaseVersion;
 using MusicShop.Application.UseCases.Catalog.ReleaseVersions.Queries.GetReleaseVersionsByRelease;
+using MusicShop.Application.DTOs.Catalog;
 using MusicShop.API.Infrastructure;
 
 namespace MusicShop.API.Controllers;
@@ -10,17 +13,34 @@ namespace MusicShop.API.Controllers;
 public class ReleaseVersionsController(IMediator mediator) : BaseApiController
 {
     [HttpGet("by-release/{releaseId:guid}")]
-    public async Task<ActionResult<ApiResponse<IReadOnlyList<Application.DTOs.Catalog.ReleaseVersionDto>>>> GetByRelease(Guid releaseId)
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<ReleaseVersionDto>>>> GetByRelease(Guid releaseId)
     {
-        Domain.Common.Result<IReadOnlyList<Application.DTOs.Catalog.ReleaseVersionDto>> result = await mediator.Send(new GetReleaseVersionsByReleaseQuery(releaseId));
+        var result = await mediator.Send(new GetReleaseVersionsByReleaseQuery(releaseId));
         return HandleResult(result);
     }
 
     [HttpPost]
     [Authorize(Roles = "admin")]
-    public async Task<ActionResult<ApiResponse<Application.DTOs.Catalog.ReleaseVersionDto>>> CreateReleaseVersion([FromBody] CreateReleaseVersionCommand command)
+    public async Task<ActionResult<ApiResponse<Guid>>> CreateReleaseVersion([FromBody] CreateReleaseVersionCommand command)
     {
-        Domain.Common.Result<Application.DTOs.Catalog.ReleaseVersionDto> result = await mediator.Send(command);
+        var result = await mediator.Send(command);
         return HandleCreatedResult(result, nameof(GetByRelease), new { releaseId = command.ReleaseId });
+    }
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "admin")]
+    public async Task<ActionResult<ApiResponse<Guid>>> UpdateReleaseVersion(Guid id, [FromBody] UpdateReleaseVersionCommand command)
+    {
+        if (id != command.Id) return BadRequest();
+        var result = await mediator.Send(command);
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "admin")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteReleaseVersion(Guid id)
+    {
+        var result = await mediator.Send(new DeleteReleaseVersionCommand(id));
+        return HandleNonGenericResult(result);
     }
 }

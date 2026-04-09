@@ -1,30 +1,29 @@
 using MediatR;
 using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
+using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.ReleaseVersions.Queries.GetReleaseVersionsByRelease;
 
-public sealed class GetReleaseVersionsByReleaseQueryHandler(IReleaseVersionRepository releaseVersionRepository)
+public sealed class GetReleaseVersionsByReleaseQueryHandler(
+    IRepository<ReleaseVersion> releaseVersionRepository,
+    IMapper mapper)
     : IRequestHandler<GetReleaseVersionsByReleaseQuery, Result<IReadOnlyList<ReleaseVersionDto>>>
 {
     public async Task<Result<IReadOnlyList<ReleaseVersionDto>>> Handle(
         GetReleaseVersionsByReleaseQuery request, 
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<MusicShop.Domain.Entities.Catalog.ReleaseVersion> versions = await releaseVersionRepository.GetByReleaseIdAsync(request.ReleaseId, cancellationToken);
+        var versions = await releaseVersionRepository.AsQueryable()
+            .Include(v => v.Label)
+            .Where(v => v.ReleaseId == request.ReleaseId)
+            .ToListAsync(cancellationToken);
 
-        List<ReleaseVersionDto> response = versions.Select(v => new ReleaseVersionDto
-        {
-            Id = v.Id,
-            PressingCountry = v.PressingCountry,
-            PressingYear = v.PressingYear,
-            Format = v.Format.ToString().ToLower(),
-            CatalogNumber = v.CatalogNumber,
-            Notes = v.Notes,
-            LabelName = v.Label?.Name ?? "Unknown Label"
-        }).ToList();
+        var dtos = mapper.Map<List<ReleaseVersionDto>>(versions);
 
-        return Result<IReadOnlyList<ReleaseVersionDto>>.Success(response);
+        return Result<IReadOnlyList<ReleaseVersionDto>>.Success(dtos.AsReadOnly());
     }
 }

@@ -1,85 +1,65 @@
 using MediatR;
-using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
-using MusicShop.Domain.Errors;
 using MusicShop.Domain.Interfaces;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
 
 public sealed class CreateReleaseCommandHandler(
-    IRepository<Artist> artistRepository,
     IRepository<Release> releaseRepository,
-    IRepository<Genre> genreRepository,
+    IRepository<Artist> artistRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateReleaseCommand, Result<ReleaseResponse>>
+    : IRequestHandler<CreateReleaseCommand, Result<Guid>>
 {
-    public async Task<Result<ReleaseResponse>> Handle(
+    public async Task<Result<Guid>> Handle(
         CreateReleaseCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. Verify Artist
-        Artist? artist = await artistRepository.GetByIdAsync(request.ArtistId);
+        // 1. Verify Artist exists
+        var artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
         if (artist == null)
-            return Result<ReleaseResponse>.Failure(ReleaseErrors.ArtistNotFound);
+        {
+            return Result<Guid>.Failure(new Error("Artist.NotFound", "Artist not found."));
+        }
 
-        // 2. Map Release
-        Release release = new Release
+        // 2. Map Command to Entity
+        var release = new Release
         {
             Title = request.Title,
             Year = request.Year,
+            Type = request.Type,
+            ArtistId = request.ArtistId,
             CoverUrl = request.CoverUrl,
-            Description = request.Description,
-            ArtistId = request.ArtistId
+            Description = request.Description
         };
 
-        // 3. Map Tracks
-        if (request.Tracks != null)
+        // 3. Add Genres
+        if (request.GenreIds != null)
         {
-            foreach (TrackCreateDto t in request.Tracks)
+            foreach (var genreId in request.GenreIds)
             {
-                release.Tracks.Add(new Track
-                {
-                    Position = t.Position,
-                    Title = t.Title,
-                    DurationSeconds = t.DurationSeconds,
-                    Side = t.Side
-                });
+                release.ReleaseGenres.Add(new ReleaseGenre { GenreId = genreId });
             }
         }
 
-        // 4. Map Genres (Junction Table)
-        if (request.GenreIds != null && request.GenreIds.Count > 0)
+        // 4. Add Tracks
+        if (request.Tracks != null)
         {
-            foreach (Guid genreId in request.GenreIds)
+            foreach (var trackDto in request.Tracks)
             {
-                Genre? genre = await genreRepository.GetByIdAsync(genreId);
-                if (genre != null)
+                release.Tracks.Add(new Track
                 {
-                    release.ReleaseGenres.Add(new ReleaseGenre { GenreId = genreId });
-                }
+                    Title = trackDto.Title,
+                    Position = trackDto.Position,
+                    DurationSeconds = trackDto.DurationSeconds,
+                    Side = trackDto.Side
+                });
             }
         }
 
         releaseRepository.Add(release);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 5. Build Response
-        return Result<ReleaseResponse>.Success(new ReleaseResponse
-        {
-            Id = release.Id,
-            Title = release.Title,
-            Year = release.Year,
-            CoverUrl = release.CoverUrl,
-            Description = release.Description,
-            ArtistId = release.ArtistId,
-            ArtistName = artist.Name,
-            Genres = release.ReleaseGenres.Select(rg => new GenreResponse
-            {
-                Id = rg.GenreId,
-                Name = rg.Genre?.Name ?? string.Empty,
-                Slug = rg.Genre?.Slug ?? string.Empty
-            }).ToList()
-        });
+        return Result<Guid>.Success(release.Id);
     }
 }

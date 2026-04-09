@@ -13,6 +13,8 @@ public class Release : BaseEntity
     public string? CoverUrl { get; set; }
     public string? Description { get; set; }
 
+    public string? Type { get; set; } // Album, EP, Single, etc.
+
     // FK
     public Guid ArtistId { get; set; }
     public Artist Artist { get; set; } = null!;

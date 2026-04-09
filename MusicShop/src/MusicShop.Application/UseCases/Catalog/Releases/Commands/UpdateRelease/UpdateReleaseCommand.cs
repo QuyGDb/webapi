@@ -1,15 +1,11 @@
 using MediatR;
 using MusicShop.Domain.Common;
+using MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
 
-namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
+namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.UpdateRelease;
 
-public record TrackCreateDto(
-    int Position, 
-    string Title, 
-    int? DurationSeconds, 
-    string? Side);
-
-public record CreateReleaseCommand(
+public record UpdateReleaseCommand(
+    Guid Id,
     string Title,
     int Year,
     string? Type,
