@@ -5,15 +5,12 @@ using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
 using MusicShop.Domain.Enums;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using MusicShop.Application.Common.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleases;
 
-public sealed class GetReleasesQueryHandler(
-    IRepository<Release> releaseRepository,
-    IMapper mapper)
+public sealed class GetReleasesQueryHandler(IRepository<Release> releaseRepository)
     : IRequestHandler<GetReleasesQuery, Result<PaginatedResult<ReleaseResponse>>>
 {
     public async Task<Result<PaginatedResult<ReleaseResponse>>> Handle(
@@ -56,15 +53,19 @@ public sealed class GetReleasesQueryHandler(
 
         // 3. Paging and Projection
         var items = await query
+            .Include(r => r.Artist)
+            .Include(r => r.ReleaseGenres)
+                .ThenInclude(rg => rg.Genre)
             .OrderByDescending(r => r.Year)
             .ThenBy(r => r.Title)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ProjectTo<ReleaseResponse>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
+        var dtos = items.Select(r => r.ToResponse()).ToList();
+
         var result = new PaginatedResult<ReleaseResponse>(
-            items,
+            dtos,
             totalCount,
             request.PageNumber,
             request.PageSize);

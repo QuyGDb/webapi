@@ -3,14 +3,12 @@ using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
-using AutoMapper;
+using MusicShop.Application.Common.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.ReleaseVersions.Queries.GetReleaseVersionsByRelease;
 
-public sealed class GetReleaseVersionsByReleaseQueryHandler(
-    IRepository<ReleaseVersion> releaseVersionRepository,
-    IMapper mapper)
+public sealed class GetReleaseVersionsByReleaseQueryHandler(IRepository<ReleaseVersion> releaseVersionRepository)
     : IRequestHandler<GetReleaseVersionsByReleaseQuery, Result<IReadOnlyList<ReleaseVersionDto>>>
 {
     public async Task<Result<IReadOnlyList<ReleaseVersionDto>>> Handle(
@@ -22,7 +20,7 @@ public sealed class GetReleaseVersionsByReleaseQueryHandler(
             .Where(v => v.ReleaseId == request.ReleaseId)
             .ToListAsync(cancellationToken);
 
-        var dtos = mapper.Map<List<ReleaseVersionDto>>(versions);
+        var dtos = versions.Select(v => v.ToDto()).ToList();
 
         return Result<IReadOnlyList<ReleaseVersionDto>>.Success(dtos.AsReadOnly());
     }

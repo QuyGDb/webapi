@@ -3,13 +3,11 @@ using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
-using AutoMapper;
+using MusicShop.Application.Common.Mappings;
 
 namespace MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtistById;
 
-public sealed class GetArtistByIdQueryHandler(
-    IArtistRepository artistRepository,
-    IMapper mapper)
+public sealed class GetArtistByIdQueryHandler(IArtistRepository artistRepository)
     : IRequestHandler<GetArtistByIdQuery, Result<ArtistResponse>>
 {
     public async Task<Result<ArtistResponse>> Handle(
@@ -23,7 +21,7 @@ public sealed class GetArtistByIdQueryHandler(
             return Result<ArtistResponse>.Failure(new Error("Artist.NotFound", "Artist not found."));
         }
 
-        var response = mapper.Map<ArtistResponse>(artist);
+        var response = artist.ToResponse();
 
         return Result<ArtistResponse>.Success(response);
     }

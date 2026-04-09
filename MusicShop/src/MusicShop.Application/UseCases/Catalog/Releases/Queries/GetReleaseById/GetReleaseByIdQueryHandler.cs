@@ -3,14 +3,12 @@ using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
-using AutoMapper;
+using MusicShop.Application.Common.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleaseById;
 
-public sealed class GetReleaseByIdQueryHandler(
-    IRepository<Release> releaseRepository,
-    IMapper mapper)
+public sealed class GetReleaseByIdQueryHandler(IRepository<Release> releaseRepository)
     : IRequestHandler<GetReleaseByIdQuery, Result<ReleaseDetailResponse>>
 {
     public async Task<Result<ReleaseDetailResponse>> Handle(
@@ -34,7 +32,7 @@ public sealed class GetReleaseByIdQueryHandler(
             return Result<ReleaseDetailResponse>.Failure(new Error("Release.NotFound", "Release not found."));
         }
 
-        var response = mapper.Map<ReleaseDetailResponse>(release);
+        var response = release.ToDetailResponse();
 
         return Result<ReleaseDetailResponse>.Success(response);
     }

@@ -4,13 +4,11 @@ using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
-using AutoMapper;
+using MusicShop.Application.Common.Mappings;
 
 namespace MusicShop.Application.UseCases.Catalog.Genres.Queries.GetGenres;
 
-public sealed class GetGenresQueryHandler(
-    IRepository<Genre> genreRepository,
-    IMapper mapper)
+public sealed class GetGenresQueryHandler(IRepository<Genre> genreRepository)
     : IRequestHandler<GetGenresQuery, Result<PaginatedResult<GenreResponse>>>
 {
     public async Task<Result<PaginatedResult<GenreResponse>>> Handle(
@@ -22,7 +20,7 @@ public sealed class GetGenresQueryHandler(
             request.PageSize, 
             cancellationToken: cancellationToken);
 
-        var dtos = mapper.Map<List<GenreResponse>>(items);
+        var dtos = items.Select(x => x.ToResponse()).ToList();
 
         var result = new PaginatedResult<GenreResponse>(
             dtos,

@@ -4,15 +4,12 @@ using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using MusicShop.Application.Common.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtists;
 
-public sealed class GetArtistsQueryHandler(
-    IArtistRepository artistRepository,
-    IMapper mapper)
+public sealed class GetArtistsQueryHandler(IArtistRepository artistRepository)
     : IRequestHandler<GetArtistsQuery, Result<PaginatedResult<ArtistResponse>>>
 {
     public async Task<Result<PaginatedResult<ArtistResponse>>> Handle(
@@ -36,15 +33,18 @@ public sealed class GetArtistsQueryHandler(
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
+            .Include(a => a.ArtistGenres)
+                .ThenInclude(ag => ag.Genre)
             .OrderBy(a => a.Name)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ProjectTo<ArtistResponse>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        var dtos = items.Select(a => a.ToResponse()).ToList();
 
         // 3. Wrap result
         var result = new PaginatedResult<ArtistResponse>(
-            items,
+            dtos,
             totalCount,
             request.PageNumber,
             request.PageSize);
