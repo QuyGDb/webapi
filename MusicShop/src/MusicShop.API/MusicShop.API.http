@@ -1,5 +1,5 @@
 @hostname = localhost
-@port = 5273
+@port = 5016
 @baseUrl = http://{{hostname}}:{{port}}/api/v1
 @authToken = <Paste_Your_Token_Here>
 
@@ -52,6 +52,11 @@ GET {{baseUrl}}/artists?pageNumber=1&pageSize=10
 
 ###
 
+# @name getArtistById
+GET {{baseUrl}}/artists/{{artistId}}
+
+###
+
 # @name createArtist
 POST {{baseUrl}}/artists
 Content-Type: application/json
@@ -62,6 +67,28 @@ Authorization: Bearer {{authToken}}
     "bio": "English rock band formed in London in 1965.",
     "country": "UK"
 }
+
+###
+
+@artistId = <Thay_ID_Vao_Day>
+
+# @name updateArtist
+PUT {{baseUrl}}/artists/{{artistId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "id": "{{artistId}}",
+    "name": "Pink Floyd (Updated)",
+    "bio": "The legendary progressive rock band.",
+    "country": "United Kingdom"
+}
+
+###
+
+# @name deleteArtist
+DELETE {{baseUrl}}/artists/{{artistId}}
+Authorization: Bearer {{authToken}}
 
 ### 4. LABELS
 

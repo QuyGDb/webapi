@@ -18,12 +18,12 @@ public sealed class GoogleLoginCommandHandler(
     : IRequestHandler<GoogleLoginCommand, Result<AuthResponse>>
 {
     public async Task<Result<AuthResponse>> Handle(
-        GoogleLoginCommand request, 
+        GoogleLoginCommand request,
         CancellationToken cancellationToken)
     {
         // 1. Verify Google Token
         Result<GoogleUserPayload> googleResult = await googleAuthService.VerifyTokenAsync(request.IdToken, cancellationToken);
-        
+
         if (googleResult.IsFailure)
         {
             return Result<AuthResponse>.Failure(googleResult.Error);
@@ -33,7 +33,7 @@ public sealed class GoogleLoginCommandHandler(
 
         // 2. Find user by Email OR ExternalId
         User? user = await userRepository.FirstOrDefaultAsync(
-            u => u.Email == payload.Email || (u.IdentityProvider == "Google" && u.ExternalId == payload.ExternalId), 
+            u => u.Email == payload.Email || (u.IdentityProvider == "Google" && u.ExternalId == payload.ExternalId),
             cancellationToken);
 
         if (user == null)

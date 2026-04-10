@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MusicShop.Application.Common.Interfaces;
 using MusicShop.Domain.Common;
 using MusicShop.Infrastructure.Security;
+using MusicShop.Application.DTOs.Auth;
 
 namespace MusicShop.Infrastructure.Services;
 

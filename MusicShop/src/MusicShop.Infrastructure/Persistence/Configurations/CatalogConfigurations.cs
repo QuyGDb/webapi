@@ -9,19 +9,19 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
     public void Configure(EntityTypeBuilder<Artist> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(200);
 
         builder.Property(x => x.Country)
             .HasMaxLength(100);
-            
+
         // 1 Artist -> Many Releases (Master)
         builder.HasMany(x => x.Releases)
             .WithOne(x => x.Artist)
             .HasForeignKey(x => x.ArtistId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -30,7 +30,7 @@ public class GenreConfiguration : IEntityTypeConfiguration<Genre>
     public void Configure(EntityTypeBuilder<Genre> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(100);
@@ -49,7 +49,7 @@ public class LabelConfiguration : IEntityTypeConfiguration<Label>
     public void Configure(EntityTypeBuilder<Label> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(200);
@@ -67,7 +67,7 @@ public class ReleaseConfiguration : IEntityTypeConfiguration<Release>
     public void Configure(EntityTypeBuilder<Release> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Title)
             .IsRequired()
             .HasMaxLength(300);
@@ -96,7 +96,7 @@ public class ReleaseVersionConfiguration : IEntityTypeConfiguration<ReleaseVersi
     public void Configure(EntityTypeBuilder<ReleaseVersion> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Format)
             .HasConversion<string>();
 
@@ -110,7 +110,7 @@ public class TrackConfiguration : IEntityTypeConfiguration<Track>
     public void Configure(EntityTypeBuilder<Track> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Title)
             .IsRequired()
             .HasMaxLength(300);

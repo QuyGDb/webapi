@@ -8,6 +8,8 @@ using MusicShop.Application.UseCases.Catalog.Artists.Commands.DeleteArtist;
 using MusicShop.Application.UseCases.Catalog.Artists.Commands.UpdateArtist;
 using MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtistById;
 using MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtists;
+using MusicShop.Domain.Common;
+using MusicShop.Application.Common;
 
 namespace MusicShop.API.Controllers;
 
@@ -16,14 +18,14 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     [HttpGet]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<ArtistResponse>>>> GetArtists([FromQuery] GetArtistsQuery query)
     {
-        var result = await mediator.Send(query);
+        Result<PaginatedResult<ArtistResponse>> result = await mediator.Send(query);
         return HandlePaginatedResult(result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ApiResponse<ArtistResponse>>> GetArtist(Guid id)
     {
-        var result = await mediator.Send(new GetArtistByIdQuery(id));
+        Result<ArtistResponse> result = await mediator.Send(new GetArtistByIdQuery(id));
         return HandleResult(result);
     }
 
@@ -31,7 +33,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     [HttpPost]
     public async Task<ActionResult<ApiResponse<Guid>>> CreateArtist([FromBody] CreateArtistCommand command)
     {
-        var result = await mediator.Send(command);
+        Result<Guid> result = await mediator.Send(command);
         return HandleCreatedResult(result, nameof(GetArtist), new { id = result.Value });
     }
 
@@ -41,7 +43,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     {
         if (id != command.Id) return BadRequest();
 
-        var result = await mediator.Send(command);
+        Result<Guid> result = await mediator.Send(command);
         return HandleResult(result);
     }
 
@@ -49,7 +51,7 @@ public class ArtistsController(IMediator mediator) : BaseApiController
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteArtist(Guid id)
     {
-        var result = await mediator.Send(new DeleteArtistCommand(id));
+        Result result = await mediator.Send(new DeleteArtistCommand(id));
         return HandleNonGenericResult(result);
     }
 }
