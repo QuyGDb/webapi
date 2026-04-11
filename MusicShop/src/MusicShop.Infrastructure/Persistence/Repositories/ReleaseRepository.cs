@@ -13,13 +13,6 @@ public sealed class ReleaseRepository : GenericRepository<Release>, IReleaseRepo
     {
     }
 
-    public async Task<Release?> GetWithArtistAsync(Guid id, CancellationToken ct = default)
-    {
-        return await _context.Set<Release>()
-            .Include(m => m.Artist)
-            .FirstOrDefaultAsync(m => m.Id == id, ct);
-    }
-
     public async Task<(IReadOnlyList<Release> Items, int TotalCount)> GetPagedAsync(
         GetReleasesQuery request,
         CancellationToken ct = default)

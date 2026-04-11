@@ -10,10 +10,9 @@ namespace MusicShop.Application.Common.Interfaces;
 public interface IReleaseRepository : IRepository<Release>
 {
     Task<(IReadOnlyList<Release> Items, int TotalCount)> GetPagedAsync(
-        GetReleasesQuery query, 
+        GetReleasesQuery query,
         CancellationToken ct = default);
 
-    Task<Release?> GetWithArtistAsync(Guid id, CancellationToken ct = default);
 
     Task<Release?> GetWithDetailsAsync(Guid id, CancellationToken ct = default);
 }
