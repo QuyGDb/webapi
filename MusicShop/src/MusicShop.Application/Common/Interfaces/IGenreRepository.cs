@@ -14,4 +14,5 @@ public interface IGenreRepository : IRepository<Genre>
         CancellationToken ct = default);
 
     Task<Genre?> GetBySlugAsync(string slug, CancellationToken ct = default);
+    Task<Genre?> GetWithAssociationsBySlugAsync(string slug, CancellationToken ct = default);
 }
