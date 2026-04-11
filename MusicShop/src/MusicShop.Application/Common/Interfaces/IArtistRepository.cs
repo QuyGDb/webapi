@@ -17,4 +17,6 @@ public interface IArtistRepository : IRepository<Artist>
     Task<(IReadOnlyList<Artist> Items, int TotalCount)> GetPagedAsync(
         GetArtistsQuery query, 
         CancellationToken ct = default);
+
+    Task<List<Artist>> SearchByNameAsync(string searchTerm, int limit, CancellationToken ct = default);
 }

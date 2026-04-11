@@ -59,4 +59,16 @@ public sealed class ArtistRepository : GenericRepository<Artist>, IArtistReposit
 
         return (items, totalCount);
     }
+
+    public async Task<List<Artist>> SearchByNameAsync(string searchTerm, int limit, CancellationToken ct = default)
+    {
+        searchTerm = searchTerm.ToLower();
+
+        return await _context.Set<Artist>()
+            .Include(x => x.ArtistGenres)
+                .ThenInclude(x => x.Genre)
+            .Where(a => a.Name.ToLower().Contains(searchTerm))
+            .Take(limit)
+            .ToListAsync(ct);
+    }
 }
