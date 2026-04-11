@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Application.Common.Interfaces;
+using MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleases;
 using MusicShop.Domain.Entities.Catalog;
+using MusicShop.Domain.Enums;
 using MusicShop.Domain.Interfaces;
 
 namespace MusicShop.Infrastructure.Persistence.Repositories;
@@ -17,13 +20,8 @@ public sealed class ReleaseRepository : GenericRepository<Release>, IReleaseRepo
             .FirstOrDefaultAsync(m => m.Id == id, ct);
     }
 
-    public async Task<(IReadOnlyList<Release> Items, int TotalCount)> GetPagedWithFiltersAsync(
-        int pageNumber,
-        int pageSize,
-        Guid? artistId = null,
-        string? genreSlug = null,
-        int? year = null,
-        string? q = null,
+    public async Task<(IReadOnlyList<Release> Items, int TotalCount)> GetPagedAsync(
+        GetReleasesQuery request,
         CancellationToken ct = default)
     {
         IQueryable<Release> query = _context.Set<Release>()
@@ -32,26 +30,47 @@ public sealed class ReleaseRepository : GenericRepository<Release>, IReleaseRepo
                 .ThenInclude(x => x.Genre)
             .AsNoTracking();
 
-        if (artistId.HasValue)
-            query = query.Where(x => x.ArtistId == artistId);
+        // 1. Filtering
+        if (!string.IsNullOrWhiteSpace(request.Q))
+        {
+            query = query.Where(r => r.Title.Contains(request.Q));
+        }
 
-        if (!string.IsNullOrWhiteSpace(genreSlug))
-            query = query.Where(x => x.ReleaseGenres.Any(rg => rg.Genre.Slug == genreSlug));
+        if (request.ArtistId.HasValue)
+        {
+            query = query.Where(r => r.ArtistId == request.ArtistId.Value);
+        }
 
-        if (year.HasValue)
-            query = query.Where(x => x.Year == year);
+        if (request.GenreId.HasValue)
+        {
+            query = query.Where(r => r.ReleaseGenres.Any(rg => rg.GenreId == request.GenreId.Value));
+        }
 
-        if (!string.IsNullOrWhiteSpace(q))
-            query = query.Where(x => x.Title.Contains(q));
+        if (!string.IsNullOrWhiteSpace(request.Type))
+        {
+            query = query.Where(r => r.Type == request.Type);
+        }
 
-        int total = await query.CountAsync(ct);
+        if (!string.IsNullOrWhiteSpace(request.Format))
+        {
+            if (Enum.TryParse<ReleaseFormat>(request.Format, true, out ReleaseFormat formatEnum))
+            {
+                query = query.Where(r => r.Versions.Any(v => v.Format == formatEnum));
+            }
+        }
+
+        // 2. Count Total
+        int totalCount = await query.CountAsync(ct);
+
+        // 3. Paging and Sorting
         List<Release> items = await query
-            .OrderByDescending(x => x.Year)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+            .OrderByDescending(r => r.Year)
+            .ThenBy(r => r.Title)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(ct);
 
-        return (items, total);
+        return (items, totalCount);
     }
 
     public async Task<Release?> GetWithDetailsAsync(Guid id, CancellationToken ct = default)
@@ -63,6 +82,9 @@ public sealed class ReleaseRepository : GenericRepository<Release>, IReleaseRepo
             .Include(x => x.Tracks.OrderBy(t => t.Position))
             .Include(x => x.Versions)
                 .ThenInclude(x => x.Label)
+            .Include(x => x.Versions)
+                .ThenInclude(v => v.Products)
+                    .ThenInclude(p => p.Variants)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
