@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Enums;
+using MusicShop.Domain.Entities.Shop;
 
 namespace MusicShop.Domain.Entities.Catalog;
 
@@ -23,5 +24,5 @@ public class ReleaseVersion : BaseEntity
     public Label Label { get; set; } = null!;
 
     // Navigation
-    public virtual ICollection<MusicShop.Domain.Entities.Shop.Product> Products { get; set; } = new List<MusicShop.Domain.Entities.Shop.Product>();
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

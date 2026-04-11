@@ -10,6 +10,11 @@ public sealed class CreateArtistCommandValidator : AbstractValidator<CreateArtis
             .NotEmpty().WithMessage("Artist name is required.")
             .MaximumLength(200).WithMessage("Artist name must not exceed 200 characters.");
 
+        RuleFor(x => x.Slug)
+            .NotEmpty().WithMessage("Slug is required.")
+            .MaximumLength(200).WithMessage("Slug must not exceed 200 characters.")
+            .Matches(@"^[a-z0-9-]+$").WithMessage("Slug must only contain lowercase letters, numbers, and hyphens.");
+
         RuleFor(x => x.Country)
             .MaximumLength(100).WithMessage("Country must not exceed 100 characters.");
 

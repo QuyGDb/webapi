@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using MusicShop.Application.Common;
 using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabels;
-using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabelById;
+using MusicShop.Application.UseCases.Catalog.Labels.Queries.GetLabelBySlug;
 using MusicShop.Application.UseCases.Catalog.Labels.Commands.CreateLabel;
 using MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
 using MusicShop.Application.UseCases.Catalog.Labels.Commands.DeleteLabel;
@@ -21,36 +21,36 @@ public class LabelsController(IMediator mediator) : BaseApiController
         return HandlePaginatedResult(result);
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<LabelResponse>>> GetLabel(Guid id)
+    [HttpGet("{slug}")]
+    public async Task<ActionResult<ApiResponse<LabelResponse>>> GetLabel(string slug)
     {
-        var result = await mediator.Send(new GetLabelByIdQuery(id));
+        var result = await mediator.Send(new GetLabelBySlugQuery(slug));
         return HandleResult(result);
     }
 
     [Authorize(Roles = "admin")]
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<Guid>>> CreateLabel([FromBody] CreateLabelCommand command)
+    public async Task<ActionResult<ApiResponse<string>>> CreateLabel([FromBody] CreateLabelCommand command)
     {
         var result = await mediator.Send(command);
-        return HandleCreatedResult(result, nameof(GetLabel), new { id = result.Value });
+        return HandleCreatedResult(result, nameof(GetLabel), new { slug = result.Value });
     }
 
     [Authorize(Roles = "admin")]
-    [HttpPut("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<Guid>>> UpdateLabel(Guid id, [FromBody] UpdateLabelCommand command)
+    [HttpPut("{slug}")]
+    public async Task<ActionResult<ApiResponse<string>>> UpdateLabel(string slug, [FromBody] UpdateLabelCommand command)
     {
-        if (id != command.Id) return BadRequest();
+        if (slug != command.OldSlug) return BadRequest();
         
         var result = await mediator.Send(command);
         return HandleResult(result);
     }
 
     [Authorize(Roles = "admin")]
-    [HttpDelete("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<object>>> DeleteLabel(Guid id)
+    [HttpDelete("{slug}")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteLabel(string slug)
     {
-        var result = await mediator.Send(new DeleteLabelCommand(id));
+        var result = await mediator.Send(new DeleteLabelCommand(slug));
         return HandleNonGenericResult(result);
     }
 }

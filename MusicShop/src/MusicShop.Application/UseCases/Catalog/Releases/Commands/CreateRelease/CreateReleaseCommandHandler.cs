@@ -2,6 +2,7 @@ using MediatR;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
 
@@ -19,7 +20,7 @@ public sealed class CreateReleaseCommandHandler(
         Artist? artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
         if (artist == null)
         {
-            return Result<Guid>.Failure(new Error("Artist.NotFound", "Artist not found."));
+            return Result<Guid>.Failure(ArtistErrors.NotFound);
         }
 
         // 2. Map Command to Entity

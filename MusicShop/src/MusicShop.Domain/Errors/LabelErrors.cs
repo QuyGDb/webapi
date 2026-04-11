@@ -9,6 +9,14 @@ public static class LabelErrors
         "The label with the specified identifier was not found.");
 
     public static readonly Error DuplicateName = new(
-        "Label.Conflict", 
+        "Label.DuplicateName", 
         "A label with the same name already exists.");
+
+    public static readonly Error DuplicateSlug = new(
+        "Label.DuplicateSlug", 
+        "A label with the same slug already exists.");
+
+    public static readonly Error HasAssociations = new(
+        "Label.HasAssociations", 
+        "Cannot delete label with existing release versions.");
 }

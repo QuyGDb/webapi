@@ -8,6 +8,7 @@ public class Artist : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string? Bio { get; set; }
     public string? Country { get; set; }
+    public string Slug { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
 
     // Navigation: 1 Artist has many Releases (Master)

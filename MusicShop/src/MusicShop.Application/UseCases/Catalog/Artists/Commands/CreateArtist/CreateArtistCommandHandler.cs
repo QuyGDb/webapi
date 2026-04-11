@@ -11,20 +11,27 @@ public sealed class CreateArtistCommandHandler(
     IRepository<Artist> artistRepository,
     IRepository<Genre> genreRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateArtistCommand, Result<Guid>>
+    : IRequestHandler<CreateArtistCommand, Result<string>>
 {
-    public async Task<Result<Guid>> Handle(
+    public async Task<Result<string>> Handle(
         CreateArtistCommand request,
         CancellationToken cancellationToken)
     {
         // 1. Check for duplicate name
-        Artist? existing = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
-        if (existing != null)
+        Artist? existingName = await artistRepository.FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
+        if (existingName != null)
         {
-            return Result<Guid>.Failure(ArtistErrors.DuplicateName);
+            return Result<string>.Failure(ArtistErrors.DuplicateName);
         }
 
-        // 2. Validate Genres existence
+        // 2. Check for duplicate slug
+         Artist? existingSlug = await artistRepository.FirstOrDefaultAsync(x => x.Slug == request.Slug, cancellationToken);
+        if (existingSlug != null)
+        {
+            return Result<string>.Failure(ArtistErrors.DuplicateSlug);
+        }
+
+        // 3. Validate Genres existence
         if (request.GenreIds != null && request.GenreIds.Any())
         {
             // Remove duplicates from request to avoid double count
@@ -35,20 +42,21 @@ public sealed class CreateArtistCommandHandler(
 
             if (existingGenresCount != distinctGenreIds.Count)
             {
-                return Result<Guid>.Failure(GenreErrors.NotFound);
+                return Result<string>.Failure(GenreErrors.NotFound);
             }
         }
 
-        // 3. Create Artist entity
+        // 4. Create Artist entity
         Artist artist = new Artist
         {
             Name = request.Name,
+            Slug = request.Slug,
             Bio = request.Bio,
             Country = request.Country,
             ImageUrl = request.ImageUrl
         };
 
-        // 4. Handle Genres many-to-many
+        // 5. Handle Genres many-to-many
         if (request.GenreIds != null && request.GenreIds.Any())
         {
             foreach (Guid genreId in request.GenreIds.Distinct())
@@ -63,6 +71,6 @@ public sealed class CreateArtistCommandHandler(
         artistRepository.Add(artist);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(artist.Id);
+        return Result<string>.Success(artist.Slug);
     }
 }

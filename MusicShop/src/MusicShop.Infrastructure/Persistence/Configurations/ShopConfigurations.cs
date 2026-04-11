@@ -9,7 +9,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(300);
@@ -24,10 +24,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .WithOne(x => x.Product)
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
         // Linked to ReleaseVersion (Pressing)
         builder.HasOne(x => x.ReleaseVersion)
-            .WithMany()
+            .WithMany(x => x.Products)
             .HasForeignKey(x => x.ReleaseVersionId)
             .OnDelete(DeleteBehavior.SetNull);
     }
@@ -38,7 +38,7 @@ public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVaria
     public void Configure(EntityTypeBuilder<ProductVariant> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.VariantName)
             .IsRequired()
             .HasMaxLength(200);
@@ -96,7 +96,7 @@ public class CuratedCollectionConfiguration : IEntityTypeConfiguration<CuratedCo
     public void Configure(EntityTypeBuilder<CuratedCollection> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Title)
             .IsRequired()
             .HasMaxLength(200);
@@ -116,7 +116,9 @@ public class CuratedCollectionItemConfiguration : IEntityTypeConfiguration<Curat
 
         builder.HasOne(x => x.Product)
             .WithMany(x => x.CollectionItems)
-            .HasForeignKey(x => x.ProductId);
+            .HasForeignKey(x => x.ProductId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 
@@ -125,11 +127,13 @@ public class RecommendationConfiguration : IEntityTypeConfiguration<Recommendati
     public void Configure(EntityTypeBuilder<Recommendation> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.HasOne(x => x.ProductVariant)
-            .WithMany()
-            .HasForeignKey(x => x.ProductVariantId);
-            
+            .WithMany() // ProductVariant doesn't need to track recommendations
+            .HasForeignKey(x => x.ProductVariantId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(x => x.UserId);
     }
 }

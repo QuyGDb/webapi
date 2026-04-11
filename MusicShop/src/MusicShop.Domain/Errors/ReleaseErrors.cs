@@ -11,4 +11,8 @@ public static class ReleaseErrors
     public static readonly Error ArtistNotFound = new(
         "Artist.NotFound", 
         "The associated artist was not found.");
+
+    public static readonly Error HasVersions = new(
+        "Release.HasVersions", 
+        "Cannot delete release with existing pressing versions.");
 }

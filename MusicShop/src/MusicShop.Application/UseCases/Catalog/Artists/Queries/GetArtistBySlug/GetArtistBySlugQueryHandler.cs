@@ -6,16 +6,16 @@ using MusicShop.Domain.Interfaces;
 using MusicShop.Application.Common.Mappings;
 using MusicShop.Domain.Errors;
 
-namespace MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtistById;
+namespace MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtistBySlug;
 
-public sealed class GetArtistByIdQueryHandler(IArtistRepository artistRepository)
-    : IRequestHandler<GetArtistByIdQuery, Result<ArtistResponse>>
+public sealed class GetArtistBySlugQueryHandler(IArtistRepository artistRepository)
+    : IRequestHandler<GetArtistBySlugQuery, Result<ArtistResponse>>
 {
     public async Task<Result<ArtistResponse>> Handle(
-        GetArtistByIdQuery request,
+        GetArtistBySlugQuery request,
         CancellationToken cancellationToken)
     {
-        Artist? artist = await artistRepository.GetWithGenresAsync(request.Id, cancellationToken);
+        Artist? artist = await artistRepository.GetWithGenresBySlugAsync(request.Slug, cancellationToken);
 
         if (artist == null)
         {

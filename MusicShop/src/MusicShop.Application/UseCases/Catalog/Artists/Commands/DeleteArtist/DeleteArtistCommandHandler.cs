@@ -3,6 +3,7 @@ using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Artists.Commands.DeleteArtist;
 
@@ -17,16 +18,16 @@ public sealed class DeleteArtistCommandHandler(
     {
         Artist? artist = await artistRepository.AsQueryable()
             .Include(x => x.Releases)
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Slug == request.Slug, cancellationToken);
 
         if (artist == null)
         {
-            return Result.Failure(new Error("Artist.NotFound", "Artist not found."));
+            return Result.Failure(ArtistErrors.NotFound);
         }
 
         if (artist.Releases.Any())
         {
-            return Result.Failure(new Error("Artist.HasAssociations", "Cannot delete artist with existing releases."));
+            return Result.Failure(ArtistErrors.HasAssociations);
         }
 
         artistRepository.Delete(artist);

@@ -4,8 +4,9 @@ using MusicShop.Domain.Common;
 namespace MusicShop.Application.UseCases.Catalog.Labels.Commands.UpdateLabel;
 
 public record UpdateLabelCommand(
-    Guid Id,
+    string OldSlug,
     string Name, 
+    string Slug,
     string? Country, 
     int? FoundedYear, 
-    string? Website) : IRequest<Result<Guid>>;
+    string? Website) : IRequest<Result<string>>;

@@ -5,6 +5,7 @@ namespace MusicShop.Application.UseCases.Catalog.Labels.Commands.CreateLabel;
 
 public record CreateLabelCommand(
     string Name, 
+    string Slug,
     string? Country, 
     int? FoundedYear, 
-    string? Website) : IRequest<Result<Guid>>;
+    string? Website) : IRequest<Result<string>>;

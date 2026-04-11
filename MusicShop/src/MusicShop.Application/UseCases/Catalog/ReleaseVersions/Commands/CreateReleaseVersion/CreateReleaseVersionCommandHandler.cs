@@ -2,6 +2,7 @@ using MediatR;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.ReleaseVersions.Commands.CreateReleaseVersion;
 
@@ -19,12 +20,12 @@ public sealed class CreateReleaseVersionCommandHandler(
         // 1. Verify Release
         Release? release = await releaseRepository.GetByIdAsync(request.ReleaseId, cancellationToken);
         if (release == null)
-            return Result<Guid>.Failure(new Error("Release.NotFound", "Release not found."));
+            return Result<Guid>.Failure(ReleaseErrors.NotFound);
 
         // 2. Verify Label
         Label? label = await labelRepository.GetByIdAsync(request.LabelId, cancellationToken);
         if (label == null)
-            return Result<Guid>.Failure(new Error("Label.NotFound", "Label not found."));
+            return Result<Guid>.Failure(LabelErrors.NotFound);
 
         // 3. Create Version
         ReleaseVersion version = new ReleaseVersion

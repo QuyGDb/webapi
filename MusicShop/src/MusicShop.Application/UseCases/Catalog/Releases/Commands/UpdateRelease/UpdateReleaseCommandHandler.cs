@@ -4,6 +4,7 @@ using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using MusicShop.Application.UseCases.Catalog.Releases.Commands.CreateRelease;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.UpdateRelease;
 
@@ -25,7 +26,7 @@ public sealed class UpdateReleaseCommandHandler(
 
         if (release == null)
         {
-            return Result<Guid>.Failure(new Error("Release.NotFound", "Release not found."));
+            return Result<Guid>.Failure(ReleaseErrors.NotFound);
         }
 
         // 2. Verify Artist exists if changed
@@ -34,7 +35,7 @@ public sealed class UpdateReleaseCommandHandler(
             Artist? artist = await artistRepository.GetByIdAsync(request.ArtistId, cancellationToken);
             if (artist == null)
             {
-                return Result<Guid>.Failure(new Error("Artist.NotFound", "New artist not found."));
+                return Result<Guid>.Failure(ArtistErrors.NotFound);
             }
             release.ArtistId = request.ArtistId;
         }

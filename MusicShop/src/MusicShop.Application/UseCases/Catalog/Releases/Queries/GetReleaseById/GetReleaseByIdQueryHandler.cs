@@ -5,6 +5,7 @@ using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
 using MusicShop.Application.Common.Mappings;
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Queries.GetReleaseById;
 
@@ -29,7 +30,7 @@ public sealed class GetReleaseByIdQueryHandler(IRepository<Release> releaseRepos
 
         if (release == null)
         {
-            return Result<ReleaseDetailResponse>.Failure(new Error("Release.NotFound", "Release not found."));
+            return Result<ReleaseDetailResponse>.Failure(ReleaseErrors.NotFound);
         }
 
         ReleaseDetailResponse response = release.ToDetailResponse();

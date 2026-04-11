@@ -17,10 +17,17 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.Property(x => x.Country)
             .HasMaxLength(100);
 
+        builder.Property(x => x.Slug)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.HasIndex(x => x.Slug).IsUnique();
+
         // 1 Artist -> Many Releases (Master)
         builder.HasMany(x => x.Releases)
             .WithOne(x => x.Artist)
             .HasForeignKey(x => x.ArtistId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -54,10 +61,17 @@ public class LabelConfiguration : IEntityTypeConfiguration<Label>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(x => x.Slug)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.HasIndex(x => x.Slug).IsUnique();
+
         // 1 Label -> Many ReleaseVersions
         builder.HasMany(x => x.ReleaseVersions)
             .WithOne(x => x.Label)
             .HasForeignKey(x => x.LabelId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -81,12 +95,14 @@ public class ReleaseConfiguration : IEntityTypeConfiguration<Release>
         builder.HasMany(x => x.Versions)
             .WithOne(x => x.Release)
             .HasForeignKey(x => x.ReleaseId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
         // 1 Release -> Many Tracks
         builder.HasMany(x => x.Tracks)
             .WithOne(x => x.Release)
             .HasForeignKey(x => x.ReleaseId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -102,6 +118,18 @@ public class ReleaseVersionConfiguration : IEntityTypeConfiguration<ReleaseVersi
 
         builder.Property(x => x.CatalogNumber)
             .HasMaxLength(100);
+
+        builder.HasOne(x => x.Release)
+            .WithMany(x => x.Versions)
+            .HasForeignKey(x => x.ReleaseId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Label)
+            .WithMany(x => x.ReleaseVersions)
+            .HasForeignKey(x => x.LabelId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -117,6 +145,12 @@ public class TrackConfiguration : IEntityTypeConfiguration<Track>
 
         builder.Property(x => x.Side)
             .HasMaxLength(10);
+
+        builder.HasOne(x => x.Release)
+            .WithMany(x => x.Tracks)
+            .HasForeignKey(x => x.ReleaseId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 
@@ -128,11 +162,13 @@ public class ArtistGenreConfiguration : IEntityTypeConfiguration<ArtistGenre>
 
         builder.HasOne(x => x.Artist)
             .WithMany(x => x.ArtistGenres)
-            .HasForeignKey(x => x.ArtistId);
+            .HasForeignKey(x => x.ArtistId)
+            .IsRequired();
 
         builder.HasOne(x => x.Genre)
-            .WithMany()
-            .HasForeignKey(x => x.GenreId);
+            .WithMany(x => x.ArtistGenres)
+            .HasForeignKey(x => x.GenreId)
+            .IsRequired();
     }
 }
 
@@ -144,10 +180,12 @@ public class ReleaseGenreConfiguration : IEntityTypeConfiguration<ReleaseGenre>
 
         builder.HasOne(x => x.Release)
             .WithMany(x => x.ReleaseGenres)
-            .HasForeignKey(x => x.ReleaseId);
+            .HasForeignKey(x => x.ReleaseId)
+            .IsRequired();
 
         builder.HasOne(x => x.Genre)
-            .WithMany()
-            .HasForeignKey(x => x.GenreId);
+            .WithMany(x => x.ReleaseGenres)
+            .HasForeignKey(x => x.GenreId)
+            .IsRequired();
     }
 }

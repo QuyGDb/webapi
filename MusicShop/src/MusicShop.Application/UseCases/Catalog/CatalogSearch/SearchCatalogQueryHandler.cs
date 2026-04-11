@@ -45,7 +45,7 @@ public sealed class SearchCatalogQueryHandler(
 
         List<ReleaseResponse> releaseDtos = releases.Select(r => r.ToResponse()).ToList();
 
-        CatalogSearchResult result = new CatalogSearchResult
+        CatalogSearchResult result = new()
         {
             Artists = artistDtos,
             Releases = releaseDtos

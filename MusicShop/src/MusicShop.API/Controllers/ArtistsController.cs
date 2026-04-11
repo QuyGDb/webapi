@@ -6,7 +6,7 @@ using MusicShop.Application.DTOs.Catalog;
 using MusicShop.Application.UseCases.Catalog.Artists.Commands.CreateArtist;
 using MusicShop.Application.UseCases.Catalog.Artists.Commands.DeleteArtist;
 using MusicShop.Application.UseCases.Catalog.Artists.Commands.UpdateArtist;
-using MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtistById;
+using MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtistBySlug;
 using MusicShop.Application.UseCases.Catalog.Artists.Queries.GetArtists;
 using MusicShop.Domain.Common;
 using MusicShop.Application.Common;
@@ -22,36 +22,36 @@ public class ArtistsController(IMediator mediator) : BaseApiController
         return HandlePaginatedResult(result);
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<ArtistResponse>>> GetArtist(Guid id)
+    [HttpGet("{slug}")]
+    public async Task<ActionResult<ApiResponse<ArtistResponse>>> GetArtist(string slug)
     {
-        Result<ArtistResponse> result = await mediator.Send(new GetArtistByIdQuery(id));
+        Result<ArtistResponse> result = await mediator.Send(new GetArtistBySlugQuery(slug));
         return HandleResult(result);
     }
 
     [Authorize(Roles = "admin")]
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<Guid>>> CreateArtist([FromBody] CreateArtistCommand command)
+    public async Task<ActionResult<ApiResponse<string>>> CreateArtist([FromBody] CreateArtistCommand command)
     {
-        Result<Guid> result = await mediator.Send(command);
-        return HandleCreatedResult(result, nameof(GetArtist), new { id = result.Value });
+        Result<string> result = await mediator.Send(command);
+        return HandleCreatedResult(result, nameof(GetArtist), new { slug = result.Value });
     }
 
     [Authorize(Roles = "admin")]
-    [HttpPut("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<Guid>>> UpdateArtist(Guid id, [FromBody] UpdateArtistCommand command)
+    [HttpPut("{slug}")]
+    public async Task<ActionResult<ApiResponse<string>>> UpdateArtist(string slug, [FromBody] UpdateArtistCommand command)
     {
-        if (id != command.Id) return BadRequest();
-
-        Result<Guid> result = await mediator.Send(command);
+        if (slug != command.OldSlug) return BadRequest();
+        
+        Result<string> result = await mediator.Send(command);
         return HandleResult(result);
     }
 
     [Authorize(Roles = "admin")]
-    [HttpDelete("{id:guid}")]
-    public async Task<ActionResult<ApiResponse<object>>> DeleteArtist(Guid id)
+    [HttpDelete("{slug}")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteArtist(string slug)
     {
-        Result result = await mediator.Send(new DeleteArtistCommand(id));
+        Result result = await mediator.Send(new DeleteArtistCommand(slug));
         return HandleNonGenericResult(result);
     }
 }

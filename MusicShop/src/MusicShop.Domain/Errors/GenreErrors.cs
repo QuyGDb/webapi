@@ -11,4 +11,8 @@ public static class GenreErrors
     public static readonly Error NotFound = new(
         "Genre.NotFound", 
         "The specified genre was not found.");
+
+    public static readonly Error HasAssociations = new(
+        "Genre.HasAssociations", 
+        "Cannot delete genre with existing associations.");
 }

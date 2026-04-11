@@ -2,21 +2,37 @@ using MediatR;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Labels.Commands.CreateLabel;
 
 public sealed class CreateLabelCommandHandler(
     IRepository<Label> labelRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateLabelCommand, Result<Guid>>
+    : IRequestHandler<CreateLabelCommand, Result<string>>
 {
-    public async Task<Result<Guid>> Handle(
+    public async Task<Result<string>> Handle(
         CreateLabelCommand request, 
         CancellationToken cancellationToken)
     {
+        // 1. Check duplicate name
+        Label? existingName = await labelRepository.FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
+        if (existingName != null)
+        {
+            return Result<string>.Failure(LabelErrors.DuplicateName);
+        }
+
+        // 2. Check duplicate slug
+        Label? existingSlug = await labelRepository.FirstOrDefaultAsync(x => x.Slug == request.Slug, cancellationToken);
+        if (existingSlug != null)
+        {
+            return Result<string>.Failure(LabelErrors.DuplicateSlug);
+        }
+
         Label label = new Label
         {
             Name = request.Name,
+            Slug = request.Slug,
             Country = request.Country,
             FoundedYear = request.FoundedYear,
             Website = request.Website
@@ -25,6 +41,6 @@ public sealed class CreateLabelCommandHandler(
         labelRepository.Add(label);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(label.Id);
+        return Result<string>.Success(label.Slug);
     }
 }

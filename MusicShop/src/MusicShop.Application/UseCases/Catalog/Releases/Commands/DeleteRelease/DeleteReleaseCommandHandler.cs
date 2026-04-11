@@ -3,6 +3,7 @@ using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
 using MusicShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Releases.Commands.DeleteRelease;
 
@@ -24,13 +25,13 @@ public sealed class DeleteReleaseCommandHandler(
 
         if (release == null)
         {
-            return Result.Failure(new Error("Release.NotFound", "Release not found."));
+            return Result.Failure(ReleaseErrors.NotFound);
         }
 
         // 2. Prevent deletion if versions exist
         if (release.Versions.Any())
         {
-            return Result.Failure(new Error("Release.HasVersions", "Cannot delete release with existing pressing versions."));
+            return Result.Failure(ReleaseErrors.HasVersions);
         }
 
         // 3. Delete metadata associations (EF Core handles cascade usually, but explicit is fine)

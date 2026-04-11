@@ -3,6 +3,7 @@ using MusicShop.Domain.Common;
 using MusicShop.Domain.Interfaces;
 using MusicShop.Domain.Entities.Catalog;
 using Microsoft.EntityFrameworkCore;
+using MusicShop.Domain.Errors;
 
 namespace MusicShop.Application.UseCases.Catalog.Genres.Commands.DeleteGenre;
 
@@ -15,16 +16,16 @@ public sealed class DeleteGenreCommandHandler(
         Genre? genre = await genreRepository.AsQueryable()
             .Include(x => x.ArtistGenres)
             .Include(x => x.ReleaseGenres)
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Slug == request.Slug, cancellationToken);
 
         if (genre is null)
         {
-            return Result.Failure(new Error("Genre.NotFound", "Genre not found."));
+            return Result.Failure(GenreErrors.NotFound);
         }
 
         if (genre.ArtistGenres.Any() || genre.ReleaseGenres.Any())
         {
-            return Result.Failure(new Error("Genre.HasAssociations", "Cannot delete genre with existing associations."));
+            return Result.Failure(GenreErrors.HasAssociations);
         }
 
         genreRepository.Delete(genre);

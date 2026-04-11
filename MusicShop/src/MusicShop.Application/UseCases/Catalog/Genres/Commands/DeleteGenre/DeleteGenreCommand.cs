@@ -6,4 +6,4 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MusicShop.Application.UseCases.Catalog.Genres.Commands.DeleteGenre;
 
-public record DeleteGenreCommand(Guid Id) : IRequest<Result>;
+public record DeleteGenreCommand(string Slug) : IRequest<Result>;

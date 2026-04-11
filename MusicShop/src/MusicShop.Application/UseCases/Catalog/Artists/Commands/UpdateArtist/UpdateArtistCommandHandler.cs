@@ -1,6 +1,7 @@
 using MediatR;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Entities.Catalog;
+using MusicShop.Domain.Errors;
 using MusicShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,43 +9,68 @@ namespace MusicShop.Application.UseCases.Catalog.Artists.Commands.UpdateArtist;
 
 public sealed class UpdateArtistCommandHandler(
     IRepository<Artist> artistRepository,
+    IRepository<Genre> genreRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateArtistCommand, Result<Guid>>
+    : IRequestHandler<UpdateArtistCommand, Result<string>>
 {
-    public async Task<Result<Guid>> Handle(
+    public async Task<Result<string>> Handle(
         UpdateArtistCommand request, 
         CancellationToken cancellationToken)
     {
         // 1. Fetch artist including Genres
         Artist? artist = await artistRepository.AsQueryable()
             .Include(x => x.ArtistGenres)
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Slug == request.OldSlug, cancellationToken);
 
         if (artist == null)
         {
-            return Result<Guid>.Failure(new Error("Artist.NotFound", "Artist not found."));
+            return Result<string>.Failure(ArtistErrors.NotFound);
         }
 
         // 2. Check for duplicate name
         Artist? existingWithSameName = await artistRepository.FirstOrDefaultAsync(
-            x => x.Name == request.Name && x.Id != request.Id, cancellationToken);
+            x => x.Name == request.Name && x.Id != artist.Id, cancellationToken);
         
         if (existingWithSameName != null)
         {
-            return Result<Guid>.Failure(new Error("Artist.DuplicateName", "Another artist with this name already exists."));
+            return Result<string>.Failure(ArtistErrors.DuplicateName);
         }
 
-        // 3. Update basic info
+        // 3. Check for duplicate slug
+        Artist? existingWithSameSlug = await artistRepository.FirstOrDefaultAsync(
+            x => x.Slug == request.Slug && x.Id != artist.Id, cancellationToken);
+        
+        if (existingWithSameSlug != null)
+        {
+            return Result<string>.Failure(ArtistErrors.DuplicateSlug);
+        }
+
+        // 4. Validate Genres existence
+        if (request.GenreIds != null && request.GenreIds.Any())
+        {
+            List<Guid> distinctGenreIds = request.GenreIds.Distinct().ToList();
+            
+            int existingGenresCount = await genreRepository.AsQueryable()
+                .CountAsync(g => distinctGenreIds.Contains(g.Id), cancellationToken);
+
+            if (existingGenresCount != distinctGenreIds.Count)
+            {
+                return Result<string>.Failure(GenreErrors.NotFound);
+            }
+        }
+
+        // 5. Update basic info
         artist.Name = request.Name;
+        artist.Slug = request.Slug;
         artist.Bio = request.Bio;
         artist.Country = request.Country;
         artist.ImageUrl = request.ImageUrl;
 
-        // 4. Update Genres (Many-to-Many synchronization)
+        // 6. Update Genres
         if (request.GenreIds != null)
         {
             artist.ArtistGenres.Clear();
-            foreach (Guid genreId in request.GenreIds)
+            foreach (Guid genreId in request.GenreIds.Distinct())
             {
                 artist.ArtistGenres.Add(new ArtistGenre { GenreId = genreId });
             }
@@ -53,6 +79,6 @@ public sealed class UpdateArtistCommandHandler(
         artistRepository.Update(artist);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(artist.Id);
+        return Result<string>.Success(artist.Slug);
     }
 }
