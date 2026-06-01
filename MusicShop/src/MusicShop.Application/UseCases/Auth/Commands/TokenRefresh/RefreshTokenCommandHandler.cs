@@ -5,7 +5,6 @@ using MusicShop.Domain.Entities.System;
 using MusicShop.Domain.Common;
 using MusicShop.Domain.Errors;
 using MusicShop.Domain.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace MusicShop.Application.UseCases.Auth.Commands.TokenRefresh;
 

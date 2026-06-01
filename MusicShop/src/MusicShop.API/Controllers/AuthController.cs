@@ -15,7 +15,7 @@ using MusicShop.API.Controllers.Base;
 
 namespace MusicShop.API.Controllers;
 
-public class AuthController(IMediator mediator, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env) : BaseApiController
+public class AuthController(IMediator mediator, IWebHostEnvironment env) : BaseApiController
 {
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

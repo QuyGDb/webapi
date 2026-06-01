@@ -117,6 +117,8 @@ app.UseHttpsRedirection();
 // Enable CORS
 app.UseCors("FrontendPolicy");
 
+app.UseRouting();
+
 // HTTP Security Headers
 app.Use(async (context, next) =>
 {

@@ -4,7 +4,9 @@ using FluentValidation;
 
 namespace MusicShop.API.Middleware;
 
-public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+public sealed class GlobalExceptionHandler(
+    ILogger<GlobalExceptionHandler> logger,
+    IWebHostEnvironment webHostEnvironment)
     : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
@@ -23,10 +25,10 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
             problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1";
 
             problemDetails.Extensions["errors"] = validationException.Errors
-                .GroupBy(x => x.PropertyName)
+                .GroupBy(validationError => validationError.PropertyName)
                 .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(x => x.ErrorMessage).ToArray()
+                    group => group.Key,
+                    group => group.Select(validationError => validationError.ErrorMessage).ToArray()
                 );
         }
         else
@@ -34,7 +36,9 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
             problemDetails.Status = StatusCodes.Status500InternalServerError;
             problemDetails.Title = "Internal Server Error";
             problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1";
-            problemDetails.Detail = exception.Message;
+            
+            bool isDev = webHostEnvironment.IsDevelopment();
+            problemDetails.Detail = isDev ? exception.ToString() : null;
         }
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
